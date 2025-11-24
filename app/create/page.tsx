@@ -1,8 +1,6 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,7 +81,7 @@ function SortableItem({ item }: { item: TierItem }) {
   );
 }
 
-export default function CreatePage() {
+function CreatePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [title, setTitle] = useState("My Tier List");
@@ -393,6 +391,37 @@ export default function CreatePage() {
     }
   };
 
+  const handleExportPNG = async () => {
+    try {
+      const tierListElement = document.getElementById("tier-list-container");
+      if (!tierListElement) return;
+
+      // Use html2canvas
+      const html2canvas = (await import("html2canvas")).default;
+      const canvas = await html2canvas(tierListElement, {
+        backgroundColor: "#ffffff",
+        scale: 2,
+      });
+
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.png`;
+        link.click();
+        URL.revokeObjectURL(url);
+      });
+    } catch (error) {
+      console.error("Error exporting PNG:", error);
+      setSaveMessage({
+        type: "error",
+        text: "Failed to export PNG. Please try again.",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 flex items-center justify-center">
@@ -449,7 +478,7 @@ export default function CreatePage() {
               {isSaving ? "Saving..." : tierlistId ? "Update" : "Save"}
             </Button>
 
-            <Button variant="outline">
+            <Button onClick={handleExportPNG} variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Export PNG
             </Button>
@@ -469,7 +498,7 @@ export default function CreatePage() {
         </div>
 
         {/* Tier List */}
-        <div className="space-y-2 mb-6">
+        <div id="tier-list-container" className="space-y-2 mb-6">
           {tiers.map((tier) => (
             <Card key={tier.id} className="p-0 overflow-hidden">
               <div className="flex">
@@ -551,5 +580,21 @@ export default function CreatePage() {
         ) : null}
       </DragOverlay>
     </DndContext>
+  );
+}
+
+export default function CreatePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="container mx-auto px-4 py-8 flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-lg">Loading...</p>
+          </div>
+        </div>
+      }
+    >
+      <CreatePageContent />
+    </Suspense>
   );
 }
