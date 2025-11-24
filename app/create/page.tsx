@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Plus, Trash2, Download } from "lucide-react";
+import { Plus, Trash2, Download, Save } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -81,10 +84,63 @@ function SortableItem({ item }: { item: TierItem }) {
 }
 
 export default function CreatePage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [title, setTitle] = useState("My Tier List");
   const [tiers, setTiers] = useState<Tier[]>(DEFAULT_TIERS);
   const [unplacedItems, setUnplacedItems] = useState<TierItem[]>([]);
   const [activeItem, setActiveItem] = useState<TierItem | null>(null);
+  const [tierlistId, setTierlistId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+
+  // Load tier list if ID is in URL
+  useEffect(() => {
+    const id = searchParams.get("id");
+    if (id && id !== tierlistId) {
+      loadTierList(id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  const loadTierList = async (id: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/tierlists/${id}`);
+      if (!response.ok) throw new Error("Failed to load tier list");
+
+      const data = await response.json();
+      setTierlistId(data.id);
+      setTitle(data.title);
+
+      // Convert database format to component format
+      const loadedTiers: Tier[] = data.tiers.map((tier: any) => ({
+        id: tier.id,
+        name: tier.name,
+        color: tier.color,
+        items: tier.items.map((item: any) => ({
+          id: item.id,
+          imageUrl: item.imageUrl,
+          label: item.label,
+        })),
+      }));
+
+      setTiers(loadedTiers);
+      setUnplacedItems([]);
+    } catch (error) {
+      console.error("Error loading tier list:", error);
+      setSaveMessage({
+        type: "error",
+        text: "Failed to load tier list.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -272,6 +328,81 @@ export default function CreatePage() {
     ...tiers.flatMap((tier) => tier.items),
   ];
 
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      const payload = {
+        title,
+        description: null,
+        isPublic: true,
+        tiers: tiers.map((tier) => ({
+          name: tier.name,
+          color: tier.color,
+          items: tier.items.map((item) => ({
+            imageUrl: item.imageUrl,
+            label: item.label,
+          })),
+        })),
+      };
+
+      if (tierlistId) {
+        // Update existing tier list
+        const response = await fetch(`/api/tierlists/${tierlistId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error("Failed to update tier list");
+
+        setSaveMessage({
+          type: "success",
+          text: "Tier list updated successfully!",
+        });
+      } else {
+        // Create new tier list
+        const response = await fetch("/api/tierlists", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) throw new Error("Failed to save tier list");
+
+        const data = await response.json();
+        setTierlistId(data.id);
+        setSaveMessage({
+          type: "success",
+          text: "Tier list saved successfully!",
+        });
+
+        // Update URL without reload
+        window.history.pushState({}, "", `/create?id=${data.id}`);
+      }
+    } catch (error) {
+      console.error("Error saving tier list:", error);
+      setSaveMessage({
+        type: "error",
+        text: "Failed to save tier list. Please try again.",
+      });
+    } finally {
+      setIsSaving(false);
+      setTimeout(() => setSaveMessage(null), 3000);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg">Loading tier list...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DndContext
       sensors={sensors}
@@ -289,7 +420,7 @@ export default function CreatePage() {
             placeholder="Tier List Title"
           />
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <label htmlFor="image-upload">
               <Button
                 type="button"
@@ -313,11 +444,28 @@ export default function CreatePage() {
               Add Tier
             </Button>
 
+            <Button onClick={handleSave} disabled={isSaving} variant="default">
+              <Save className="w-4 h-4 mr-2" />
+              {isSaving ? "Saving..." : tierlistId ? "Update" : "Save"}
+            </Button>
+
             <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Export PNG
             </Button>
           </div>
+
+          {saveMessage && (
+            <div
+              className={`mt-4 p-3 rounded ${
+                saveMessage.type === "success"
+                  ? "bg-green-100 text-green-800 border border-green-300"
+                  : "bg-red-100 text-red-800 border border-red-300"
+              }`}
+            >
+              {saveMessage.text}
+            </div>
+          )}
         </div>
 
         {/* Tier List */}
