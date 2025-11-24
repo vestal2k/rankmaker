@@ -6,6 +6,8 @@ import { useUser, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Download, Save } from "lucide-react";
 import {
   DndContext,
@@ -87,6 +89,7 @@ function CreatePageContent() {
   const searchParams = useSearchParams();
   const { isSignedIn } = useUser();
   const [title, setTitle] = useState("My Tier List");
+  const [isPublic, setIsPublic] = useState(true);
   const [tiers, setTiers] = useState<Tier[]>(DEFAULT_TIERS);
   const [unplacedItems, setUnplacedItems] = useState<TierItem[]>([]);
   const [activeItem, setActiveItem] = useState<TierItem | null>(null);
@@ -117,6 +120,7 @@ function CreatePageContent() {
       const data = await response.json();
       setTierlistId(data.id);
       setTitle(data.title);
+      setIsPublic(data.isPublic);
 
       // Convert database format to component format
       const loadedTiers: Tier[] = data.tiers.map((tier: any) => ({
@@ -177,21 +181,40 @@ function CreatePageContent() {
     setTiers(tiers.map((t) => (t.id === tierId ? { ...t, color } : t)));
   };
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const newItem: TierItem = {
-          id: `item-${Date.now()}-${Math.random()}`,
-          imageUrl: event.target?.result as string,
-        };
-        setUnplacedItems((prev) => [...prev, newItem]);
-      };
-      reader.readAsDataURL(file);
-    });
+    try {
+      // Create FormData and append all files
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append("files", file);
+      });
+
+      // Upload to Vercel Blob
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload images");
+      }
+
+      const data = await response.json();
+
+      // Add uploaded images to unplaced items
+      const newItems: TierItem[] = data.files.map((file: { url: string }) => ({
+        id: `item-${Date.now()}-${Math.random()}`,
+        imageUrl: file.url,
+      }));
+
+      setUnplacedItems((prev) => [...prev, ...newItems]);
+    } catch (error) {
+      console.error("Error uploading images:", error);
+      alert("Failed to upload images. Please try again.");
+    }
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -343,7 +366,7 @@ function CreatePageContent() {
       const payload = {
         title,
         description: null,
-        isPublic: true,
+        isPublic,
         tiers: tiers.map((tier) => ({
           name: tier.name,
           color: tier.color,
@@ -457,6 +480,17 @@ function CreatePageContent() {
             className="text-2xl font-bold mb-4"
             placeholder="Tier List Title"
           />
+
+          <div className="flex items-center gap-2 mb-4">
+            <Switch
+              id="public-toggle"
+              checked={isPublic}
+              onCheckedChange={setIsPublic}
+            />
+            <Label htmlFor="public-toggle" className="cursor-pointer">
+              {isPublic ? "Public" : "Private"} tier list
+            </Label>
+          </div>
 
           <div className="flex gap-2 flex-wrap">
             <label htmlFor="image-upload">
