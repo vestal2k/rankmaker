@@ -12,7 +12,7 @@ export function Header() {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="text-xl font-bold">
-            Tierlist Maker
+            Rankmaker
           </Link>
           <nav className="hidden md:flex items-center gap-4">
             <Link href="/explore" className="text-sm hover:underline">

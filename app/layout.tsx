@@ -4,8 +4,11 @@ import { Header } from "@/components/header";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Tierlist Maker",
+  title: "Rankmaker",
   description: "Create and share tier lists with your community",
+  icons: {
+    icon: "/logo.png",
+  },
 };
 
 export default function RootLayout({

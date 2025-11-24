@@ -1,4 +1,4 @@
-# 🎯 Tierlist Maker
+# 🎯 Rankmaker
 
 A modern, feature-rich tier list creation platform - an improved version of tiermaker.com with enhanced UX, real-time collaboration, and social features.
 
@@ -83,7 +83,7 @@ A modern, feature-rich tier list creation platform - an improved version of tier
 ## 📁 Project Structure
 
 ```
-tierlist-maker/
+rankmaker/
 ├── app/                    # Next.js app directory
 │   ├── create/            # Tier list builder page
 │   ├── sign-in/           # Authentication pages
