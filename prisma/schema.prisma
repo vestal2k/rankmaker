@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  username  String   @unique
+  email     String   @unique
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tierlists TierList[]
+  comments  Comment[]
+  likes     Like[]
+}
+
+model TierList {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  isPublic    Boolean  @default(true)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tiers    Tier[]
+  comments Comment[]
+  likes    Like[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Tier {
+  id         String     @id @default(cuid())
+  name       String
+  color      String     @default("#808080")
+  order      Int
+  tierListId String
+  tierList   TierList   @relation(fields: [tierListId], references: [id], onDelete: Cascade)
+  items      TierItem[]
+
+  @@index([tierListId])
+}
+
+model TierItem {
+  id       String  @id @default(cuid())
+  imageUrl String
+  label    String?
+  order    Int
+  tierId   String
+  tier     Tier    @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@index([tierId])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  content    String
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tierListId String
+  tierList   TierList @relation(fields: [tierListId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tierListId])
+  @@index([userId])
+}
+
+model Like {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tierListId String
+  tierList   TierList @relation(fields: [tierListId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, tierListId])
+  @@index([tierListId])
+  @@index([userId])
+}
