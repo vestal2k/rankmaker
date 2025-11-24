@@ -26,6 +26,22 @@ export async function GET(
             imageUrl: true,
           },
         },
+        comments: {
+          include: {
+            user: {
+              select: {
+                username: true,
+                imageUrl: true,
+              },
+            },
+          },
+          orderBy: { createdAt: "desc" },
+        },
+        likes: {
+          select: {
+            userId: true,
+          },
+        },
         _count: {
           select: { likes: true, comments: true },
         },

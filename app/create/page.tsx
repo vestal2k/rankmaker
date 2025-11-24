@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useUser, SignInButton } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -84,6 +85,7 @@ function SortableItem({ item }: { item: TierItem }) {
 function CreatePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isSignedIn } = useUser();
   const [title, setTitle] = useState("My Tier List");
   const [tiers, setTiers] = useState<Tier[]>(DEFAULT_TIERS);
   const [unplacedItems, setUnplacedItems] = useState<TierItem[]>([]);
@@ -91,6 +93,7 @@ function CreatePageContent() {
   const [tierlistId, setTierlistId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [saveMessage, setSaveMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -327,6 +330,12 @@ function CreatePageContent() {
   ];
 
   const handleSave = async () => {
+    // Check if user is signed in
+    if (!isSignedIn) {
+      setShowAuthPrompt(true);
+      return;
+    }
+
     setIsSaving(true);
     setSaveMessage(null);
 
@@ -493,6 +502,26 @@ function CreatePageContent() {
               }`}
             >
               {saveMessage.text}
+            </div>
+          )}
+
+          {showAuthPrompt && (
+            <div className="mt-4 p-4 rounded border border-blue-300 bg-blue-50">
+              <p className="text-blue-900 mb-3">
+                Sign in to save your tier list and access it later!
+              </p>
+              <div className="flex gap-2">
+                <SignInButton mode="modal">
+                  <Button size="sm">Sign In</Button>
+                </SignInButton>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setShowAuthPrompt(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
             </div>
           )}
         </div>
