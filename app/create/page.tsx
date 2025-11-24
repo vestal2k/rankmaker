@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Download, Save } from "lucide-react";
+import { getContrastColor } from "@/lib/utils";
 import {
   DndContext,
   closestCenter,
@@ -567,13 +568,19 @@ function CreatePageContent() {
               <div className="flex">
                 {/* Tier Label */}
                 <div
-                  className="w-24 flex items-center justify-center font-bold text-lg shrink-0"
+                  className="w-24 flex items-center justify-center font-bold text-lg shrink-0 p-2"
                   style={{ backgroundColor: tier.color }}
                 >
                   <Input
                     value={tier.name}
                     onChange={(e) => updateTierName(tier.id, e.target.value)}
-                    className="text-center border-none bg-transparent font-bold text-lg w-full"
+                    className="text-center border-none bg-transparent font-bold text-lg w-full break-words overflow-wrap-anywhere leading-tight"
+                    style={{
+                      color: getContrastColor(tier.color),
+                      wordBreak: 'break-word',
+                      overflowWrap: 'anywhere',
+                      whiteSpace: 'normal'
+                    }}
                   />
                 </div>
 

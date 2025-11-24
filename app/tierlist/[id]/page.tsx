@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Heart, MessageCircle, Share2, Edit } from "lucide-react";
+import { getContrastColor } from "@/lib/utils";
 
 interface TierItem {
   id: string;
@@ -218,8 +219,13 @@ export default function TierListPage({
             <Card key={tier.id} className="p-0 overflow-hidden">
               <div className="flex">
                 <div
-                  className="w-24 flex items-center justify-center font-bold text-lg shrink-0"
-                  style={{ backgroundColor: tier.color }}
+                  className="w-24 flex items-center justify-center font-bold text-lg shrink-0 p-2 break-words text-center"
+                  style={{
+                    backgroundColor: tier.color,
+                    color: getContrastColor(tier.color),
+                    wordBreak: 'break-word',
+                    overflowWrap: 'anywhere'
+                  }}
                 >
                   {tier.name}
                 </div>
