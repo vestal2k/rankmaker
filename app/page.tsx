@@ -15,7 +15,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-950 py-20 sm:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-b from-blue-50 to-white dark:from-[#161618] dark:to-[#1a1a1c] py-20 sm:py-32">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-5xl sm:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -43,14 +43,14 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section className="py-20 bg-white dark:bg-[#161618]">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
             Everything You Need
           </h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             <Card className="p-6">
-              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-950/50 rounded-lg flex items-center justify-center mb-4">
                 <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Easy Drag & Drop</h3>
@@ -60,7 +60,7 @@ export default function Home() {
             </Card>
 
             <Card className="p-6">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-950/50 rounded-lg flex items-center justify-center mb-4">
                 <Download className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2">PNG Export</h3>
@@ -70,7 +70,7 @@ export default function Home() {
             </Card>
 
             <Card className="p-6">
-              <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-950/50 rounded-lg flex items-center justify-center mb-4">
                 <Users className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Social Features</h3>
@@ -80,7 +80,7 @@ export default function Home() {
             </Card>
 
             <Card className="p-6">
-              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-orange-100 dark:bg-orange-950/50 rounded-lg flex items-center justify-center mb-4">
                 <Lock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Public or Private</h3>
@@ -90,7 +90,7 @@ export default function Home() {
             </Card>
 
             <Card className="p-6">
-              <div className="w-12 h-12 bg-red-100 dark:bg-red-900 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-red-100 dark:bg-red-950/50 rounded-lg flex items-center justify-center mb-4">
                 <Zap className="w-6 h-6 text-red-600 dark:text-red-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2">No Login Required</h3>
@@ -100,7 +100,7 @@ export default function Home() {
             </Card>
 
             <Card className="p-6">
-              <div className="w-12 h-12 bg-pink-100 dark:bg-pink-900 rounded-lg flex items-center justify-center mb-4">
+              <div className="w-12 h-12 bg-pink-100 dark:bg-pink-950/50 rounded-lg flex items-center justify-center mb-4">
                 <Heart className="w-6 h-6 text-pink-600 dark:text-pink-400" />
               </div>
               <h3 className="text-xl font-semibold mb-2">Custom Tiers</h3>
@@ -113,7 +113,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900">
+      <section className="py-20 bg-gray-50 dark:bg-[#1a1a1c]">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12">
             How It Works
@@ -180,7 +180,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 bg-gray-100 dark:bg-gray-950">
+      <footer className="py-8 bg-gray-100 dark:bg-[#161618]">
         <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
           <p>© 2025 Rankmaker. Create and share your rankings.</p>
         </div>
