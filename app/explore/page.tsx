@@ -8,6 +8,8 @@ import { Heart, MessageCircle } from "lucide-react";
 interface TierListPreview {
   id: string;
   title: string;
+  description: string | null;
+  coverImageUrl: string | null;
   createdAt: string;
   user: {
     username: string;
@@ -67,34 +69,50 @@ export default function ExplorePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {tierlists.map((tierlist) => (
             <Link key={tierlist.id} href={`/tierlist/${tierlist.id}`}>
-              <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer">
-                <h3 className="font-bold text-lg mb-2 truncate">
-                  {tierlist.title}
-                </h3>
-                <div className="flex items-center gap-2 mb-3">
-                  {tierlist.user.imageUrl && (
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+                {tierlist.coverImageUrl && (
+                  <div className="w-full h-32 overflow-hidden">
                     <img
-                      src={tierlist.user.imageUrl}
-                      alt={tierlist.user.username}
-                      className="w-6 h-6 rounded-full"
+                      src={tierlist.coverImageUrl}
+                      alt={tierlist.title}
+                      className="w-full h-full object-cover"
                     />
+                  </div>
+                )}
+                <div className="p-4">
+                  <h3 className="font-bold text-lg mb-1 truncate">
+                    {tierlist.title}
+                  </h3>
+                  {tierlist.description && (
+                    <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
+                      {tierlist.description}
+                    </p>
                   )}
-                  <span className="text-sm text-gray-600">
-                    {tierlist.user.username}
-                  </span>
-                </div>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Heart className="w-4 h-4" />
-                    <span>{tierlist._count.likes}</span>
+                  <div className="flex items-center gap-2 mb-3">
+                    {tierlist.user.imageUrl && (
+                      <img
+                        src={tierlist.user.imageUrl}
+                        alt={tierlist.user.username}
+                        className="w-6 h-6 rounded-full"
+                      />
+                    )}
+                    <span className="text-sm text-gray-600">
+                      {tierlist.user.username}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <MessageCircle className="w-4 h-4" />
-                    <span>{tierlist._count.comments}</span>
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <Heart className="w-4 h-4" />
+                      <span>{tierlist._count.likes}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <MessageCircle className="w-4 h-4" />
+                      <span>{tierlist._count.comments}</span>
+                    </div>
+                    <span className="ml-auto">
+                      {new Date(tierlist.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
-                  <span className="ml-auto">
-                    {new Date(tierlist.createdAt).toLocaleDateString()}
-                  </span>
                 </div>
               </Card>
             </Link>

@@ -9,6 +9,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+    const anonymousId = request.headers.get("x-anonymous-id");
 
     const tierlist = await db.tierList.findUnique({
       where: { id },
@@ -59,16 +60,25 @@ export async function GET(
     const { userId: clerkId } = await auth();
 
     if (!tierlist.isPublic) {
-      if (!clerkId) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
+      // For private tierlists, check ownership
+      if (tierlist.anonymousId) {
+        // Anonymous tierlist - check anonymousId
+        if (tierlist.anonymousId !== anonymousId) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+      } else if (tierlist.userId) {
+        // User tierlist - check user ownership
+        if (!clerkId) {
+          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
 
-      const user = await db.user.findUnique({
-        where: { clerkId },
-      });
+        const user = await db.user.findUnique({
+          where: { clerkId },
+        });
 
-      if (!user || user.id !== tierlist.userId) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        if (!user || user.id !== tierlist.userId) {
+          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
       }
     }
 
@@ -89,25 +99,11 @@ export async function PUT(
 ) {
   try {
     const { userId: clerkId } = await auth();
-
-    if (!clerkId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
     const body = await request.json();
-    const { title, description, isPublic, tiers } = body;
+    const { title, description, coverImageUrl, isPublic, tiers, anonymousId } = body;
 
-    // Find user in database
-    const user = await db.user.findUnique({
-      where: { clerkId },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Check if tier list belongs to user
+    // Get existing tierlist
     const existingTierlist = await db.tierList.findUnique({
       where: { id },
     });
@@ -119,8 +115,33 @@ export async function PUT(
       );
     }
 
-    if (existingTierlist.userId !== user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // Check ownership
+    if (existingTierlist.anonymousId) {
+      // Anonymous tierlist - check anonymousId
+      if (existingTierlist.anonymousId !== anonymousId) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+
+      // Anonymous users cannot make tierlists public
+      if (isPublic) {
+        return NextResponse.json(
+          { error: "Authentication required to publish public tier lists" },
+          { status: 401 }
+        );
+      }
+    } else if (existingTierlist.userId) {
+      // User tierlist - check user ownership
+      if (!clerkId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const user = await db.user.findUnique({
+        where: { clerkId },
+      });
+
+      if (!user || user.id !== existingTierlist.userId) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     // Delete old tiers and items, then create new ones
@@ -134,7 +155,8 @@ export async function PUT(
       data: {
         title: title || existingTierlist.title,
         description: description !== undefined ? description : existingTierlist.description,
-        isPublic: isPublic !== undefined ? isPublic : existingTierlist.isPublic,
+        coverImageUrl: coverImageUrl !== undefined ? coverImageUrl : existingTierlist.coverImageUrl,
+        isPublic: existingTierlist.anonymousId ? false : (isPublic !== undefined ? isPublic : existingTierlist.isPublic),
         tiers: tiers
           ? {
               create: tiers.map((tier: any, index: number) => ({
@@ -181,23 +203,10 @@ export async function DELETE(
 ) {
   try {
     const { userId: clerkId } = await auth();
-
-    if (!clerkId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
+    const anonymousId = request.headers.get("x-anonymous-id");
 
-    // Find user in database
-    const user = await db.user.findUnique({
-      where: { clerkId },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    // Check if tier list belongs to user
+    // Get tierlist
     const tierlist = await db.tierList.findUnique({
       where: { id },
     });
@@ -209,8 +218,25 @@ export async function DELETE(
       );
     }
 
-    if (tierlist.userId !== user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // Check ownership
+    if (tierlist.anonymousId) {
+      // Anonymous tierlist - check anonymousId
+      if (tierlist.anonymousId !== anonymousId) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    } else if (tierlist.userId) {
+      // User tierlist - check user ownership
+      if (!clerkId) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+
+      const user = await db.user.findUnique({
+        where: { clerkId },
+      });
+
+      if (!user || user.id !== tierlist.userId) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
     }
 
     // Delete tier list (cascade will delete tiers and items)

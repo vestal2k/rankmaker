@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette } from "lucide-react";
+import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -92,11 +93,26 @@ function SortableItem({ item }: { item: TierItem }) {
   );
 }
 
+// Generate or retrieve anonymous ID
+const getAnonymousId = () => {
+  if (typeof window === "undefined") return null;
+  let anonymousId = localStorage.getItem("rankmaker_anonymous_id");
+  if (!anonymousId) {
+    anonymousId = `anon_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+    localStorage.setItem("rankmaker_anonymous_id", anonymousId);
+  }
+  return anonymousId;
+};
+
 function CreatePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { isSignedIn } = useUser();
+  const [anonymousId, setAnonymousId] = useState<string | null>(null);
   const [title, setTitle] = useState("My Tier List");
+  const [description, setDescription] = useState("");
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
   const [tiers, setTiers] = useState<Tier[]>(DEFAULT_TIERS);
   const [unplacedItems, setUnplacedItems] = useState<TierItem[]>([]);
@@ -110,6 +126,11 @@ function CreatePageContent() {
     text: string;
   } | null>(null);
 
+  // Get anonymous ID on mount
+  useEffect(() => {
+    setAnonymousId(getAnonymousId());
+  }, []);
+
   // Load tier list if ID is in URL
   useEffect(() => {
     const id = searchParams.get("id");
@@ -122,12 +143,20 @@ function CreatePageContent() {
   const loadTierList = async (id: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/tierlists/${id}`);
+      const headers: Record<string, string> = {};
+      const anonId = getAnonymousId();
+      if (anonId) {
+        headers["x-anonymous-id"] = anonId;
+      }
+
+      const response = await fetch(`/api/tierlists/${id}`, { headers });
       if (!response.ok) throw new Error("Failed to load tier list");
 
       const data = await response.json();
       setTierlistId(data.id);
       setTitle(data.title);
+      setDescription(data.description || "");
+      setCoverImageUrl(data.coverImageUrl || null);
       setIsPublic(data.isPublic);
 
       // Convert database format to component format
@@ -251,6 +280,34 @@ function CreatePageContent() {
     } catch (error) {
       console.error("Error uploading images:", error);
       alert("Failed to upload images. Please try again.");
+    }
+  };
+
+  const handleCoverImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingCover(true);
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload cover image");
+      }
+
+      const data = await response.json();
+      setCoverImageUrl(data.files[0].url);
+    } catch (error) {
+      console.error("Error uploading cover image:", error);
+      alert("Failed to upload cover image. Please try again.");
+    } finally {
+      setIsUploadingCover(false);
     }
   };
 
@@ -390,8 +447,8 @@ function CreatePageContent() {
   ];
 
   const handleSave = async () => {
-    // Check if user is signed in
-    if (!isSignedIn) {
+    // If not signed in and trying to make public, show auth prompt
+    if (!isSignedIn && isPublic) {
       setShowAuthPrompt(true);
       return;
     }
@@ -400,10 +457,11 @@ function CreatePageContent() {
     setSaveMessage(null);
 
     try {
-      const payload = {
+      const payload: Record<string, any> = {
         title,
-        description: null,
-        isPublic,
+        description: description || null,
+        coverImageUrl: coverImageUrl || null,
+        isPublic: isSignedIn ? isPublic : false, // Force private for anonymous users
         tiers: tiers.map((tier) => ({
           name: tier.name,
           color: tier.color,
@@ -413,6 +471,11 @@ function CreatePageContent() {
           })),
         })),
       };
+
+      // Add anonymousId for non-authenticated users
+      if (!isSignedIn && anonymousId) {
+        payload.anonymousId = anonymousId;
+      }
 
       if (tierlistId) {
         // Update existing tier list
@@ -426,7 +489,9 @@ function CreatePageContent() {
 
         setSaveMessage({
           type: "success",
-          text: "Tier list updated successfully!",
+          text: isSignedIn
+            ? "Tier list updated successfully!"
+            : "Tier list saved privately. Sign in to publish it!",
         });
       } else {
         // Create new tier list
@@ -442,7 +507,9 @@ function CreatePageContent() {
         setTierlistId(data.id);
         setSaveMessage({
           type: "success",
-          text: "Tier list saved successfully!",
+          text: isSignedIn
+            ? "Tier list saved successfully!"
+            : "Tier list saved privately. Sign in to publish it!",
         });
 
         // Update URL without reload
@@ -456,7 +523,7 @@ function CreatePageContent() {
       });
     } finally {
       setIsSaving(false);
-      setTimeout(() => setSaveMessage(null), 3000);
+      setTimeout(() => setSaveMessage(null), 5000);
     }
   };
 
@@ -518,14 +585,69 @@ function CreatePageContent() {
             placeholder="Tier List Title"
           />
 
+          <Textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="mb-4"
+            placeholder="Add a description for your tier list (optional)"
+            rows={2}
+          />
+
+          {/* Cover Image */}
+          <div className="mb-4">
+            <Label className="text-sm font-medium mb-2 block">Cover Image (optional)</Label>
+            {coverImageUrl ? (
+              <div className="relative w-full max-w-md h-32 rounded-lg overflow-hidden border border-border">
+                <img
+                  src={coverImageUrl}
+                  alt="Cover"
+                  className="w-full h-full object-cover"
+                />
+                <Button
+                  size="icon"
+                  variant="destructive"
+                  className="absolute top-2 right-2 w-6 h-6"
+                  onClick={() => setCoverImageUrl(null)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            ) : (
+              <label htmlFor="cover-image-upload">
+                <div className="w-full max-w-md h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
+                  {isUploadingCover ? (
+                    <span className="text-muted-foreground">Uploading...</span>
+                  ) : (
+                    <div className="flex flex-col items-center text-muted-foreground">
+                      <ImageIcon className="w-8 h-8 mb-2" />
+                      <span className="text-sm">Click to upload cover image</span>
+                    </div>
+                  )}
+                </div>
+                <input
+                  id="cover-image-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCoverImageUpload}
+                  disabled={isUploadingCover}
+                />
+              </label>
+            )}
+          </div>
+
           <div className="flex items-center gap-2 mb-4">
             <Switch
               id="public-toggle"
-              checked={isPublic}
+              checked={isSignedIn ? isPublic : false}
               onCheckedChange={setIsPublic}
+              disabled={!isSignedIn}
             />
-            <Label htmlFor="public-toggle" className="cursor-pointer">
-              {isPublic ? "Public" : "Private"} tier list
+            <Label htmlFor="public-toggle" className={`cursor-pointer ${!isSignedIn ? "text-muted-foreground" : ""}`}>
+              {isSignedIn ? (isPublic ? "Public" : "Private") : "Private"} tier list
+              {!isSignedIn && (
+                <span className="text-xs ml-2">(Sign in to publish publicly)</span>
+              )}
             </Label>
           </div>
 
@@ -559,9 +681,9 @@ function CreatePageContent() {
           )}
 
           {showAuthPrompt && (
-            <div className="mt-4 p-4 rounded border border-blue-300 bg-blue-50">
-              <p className="text-blue-900 mb-3">
-                Sign in to save your tier list and access it later!
+            <div className="mt-4 p-4 rounded border border-blue-300 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
+              <p className="text-blue-900 dark:text-blue-100 mb-3">
+                Sign in to publish your tier list publicly! You can still save it privately without an account.
               </p>
               <div className="flex gap-2">
                 <SignInButton mode="modal">
@@ -570,6 +692,18 @@ function CreatePageContent() {
                 <Button
                   size="sm"
                   variant="outline"
+                  onClick={() => {
+                    setShowAuthPrompt(false);
+                    setIsPublic(false);
+                    // Trigger save as private
+                    setTimeout(() => handleSave(), 100);
+                  }}
+                >
+                  Save as Private
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
                   onClick={() => setShowAuthPrompt(false)}
                 >
                   Cancel

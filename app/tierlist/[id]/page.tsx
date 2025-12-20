@@ -38,6 +38,7 @@ interface TierListDetail {
   id: string;
   title: string;
   description: string | null;
+  coverImageUrl: string | null;
   isPublic: boolean;
   createdAt: string;
   user: {
@@ -163,6 +164,17 @@ export default function TierListPage({
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
+      {/* Cover Image */}
+      {tierlist.coverImageUrl && (
+        <div className="mb-6 w-full h-48 md:h-64 rounded-lg overflow-hidden">
+          <img
+            src={tierlist.coverImageUrl}
+            alt={tierlist.title}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-start justify-between mb-4">
@@ -176,6 +188,11 @@ export default function TierListPage({
             </Link>
           )}
         </div>
+
+        {/* Description */}
+        {tierlist.description && (
+          <p className="text-muted-foreground mb-4">{tierlist.description}</p>
+        )}
 
         <div className="flex items-center gap-4 mb-4">
           {tierlist.user.imageUrl && (

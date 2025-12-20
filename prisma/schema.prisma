@@ -24,20 +24,23 @@ model User {
 }
 
 model TierList {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  isPublic    Boolean  @default(true)
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(cuid())
+  title         String
+  description   String?
+  coverImageUrl String?
+  isPublic      Boolean  @default(true)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousId   String?  // For anonymous users (stored in localStorage)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
   tiers    Tier[]
   comments Comment[]
   likes    Like[]
 
   @@index([userId])
+  @@index([anonymousId])
   @@index([createdAt])
 }
 
