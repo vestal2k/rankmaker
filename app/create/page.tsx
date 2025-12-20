@@ -8,7 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Download, Save } from "lucide-react";
+import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { getContrastColor } from "@/lib/utils";
 import {
   DndContext,
@@ -180,6 +187,35 @@ function CreatePageContent() {
 
   const updateTierColor = (tierId: string, color: string) => {
     setTiers(tiers.map((t) => (t.id === tierId ? { ...t, color } : t)));
+  };
+
+  const moveTierUp = (tierId: string) => {
+    const index = tiers.findIndex((t) => t.id === tierId);
+    if (index <= 0) return;
+    const newTiers = [...tiers];
+    [newTiers[index - 1], newTiers[index]] = [newTiers[index], newTiers[index - 1]];
+    setTiers(newTiers);
+  };
+
+  const moveTierDown = (tierId: string) => {
+    const index = tiers.findIndex((t) => t.id === tierId);
+    if (index === -1 || index >= tiers.length - 1) return;
+    const newTiers = [...tiers];
+    [newTiers[index], newTiers[index + 1]] = [newTiers[index + 1], newTiers[index]];
+    setTiers(newTiers);
+  };
+
+  const addTierAfter = (tierId: string) => {
+    const index = tiers.findIndex((t) => t.id === tierId);
+    const newTier: Tier = {
+      id: `tier-${Date.now()}`,
+      name: "New",
+      color: "#808080",
+      items: [],
+    };
+    const newTiers = [...tiers];
+    newTiers.splice(index + 1, 0, newTier);
+    setTiers(newTiers);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -494,24 +530,6 @@ function CreatePageContent() {
           </div>
 
           <div className="flex gap-2 flex-wrap">
-            <label htmlFor="image-upload">
-              <Button
-                type="button"
-                onClick={() => document.getElementById("image-upload")?.click()}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Add Images
-              </Button>
-            </label>
-            <input
-              id="image-upload"
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={handleImageUpload}
-            />
-
             <Button onClick={addTier} variant="outline">
               <Plus className="w-4 h-4 mr-2" />
               Add Tier
@@ -601,29 +619,64 @@ function CreatePageContent() {
                 </SortableContext>
 
                 {/* Controls */}
-                <div className="flex flex-col gap-2 p-2">
-                  <input
-                    type="color"
-                    value={tier.color}
-                    onChange={(e) => updateTierColor(tier.id, e.target.value)}
-                    className="w-8 h-8 rounded cursor-pointer"
-                  />
-                  <Button
-                    size="icon"
-                    variant="destructive"
-                    onClick={() => removeTier(tier.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                <div className="flex items-center p-2">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button size="icon" variant="ghost">
+                        <Settings className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => moveTierUp(tier.id)}
+                        disabled={tiers.findIndex((t) => t.id === tier.id) === 0}
+                      >
+                        <ChevronUp className="w-4 h-4 mr-2" />
+                        Move Up
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => moveTierDown(tier.id)}
+                        disabled={tiers.findIndex((t) => t.id === tier.id) === tiers.length - 1}
+                      >
+                        <ChevronDown className="w-4 h-4 mr-2" />
+                        Move Down
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <label className="flex items-center cursor-pointer">
+                          <Palette className="w-4 h-4 mr-2" />
+                          Change Color
+                          <input
+                            type="color"
+                            value={tier.color}
+                            onChange={(e) => updateTierColor(tier.id, e.target.value)}
+                            className="w-0 h-0 opacity-0 absolute"
+                          />
+                        </label>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => addTierAfter(tier.id)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Tier Below
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => removeTier(tier.id)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Tier
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             </Card>
           ))}
         </div>
 
-        {/* Unplaced Items */}
+        {/* Unplaced Items (Pool) */}
         <Card className="p-4">
-          <h3 className="font-semibold mb-3">Unplaced Items</h3>
+          <h3 className="font-semibold mb-3">Pool</h3>
           <SortableContext
             items={unplacedItems.map((i) => i.id)}
             strategy={rectSortingStrategy}
@@ -635,6 +688,27 @@ function CreatePageContent() {
               ))}
             </div>
           </SortableContext>
+          <div className="mt-4 pt-4 border-t border-border">
+            <label htmlFor="pool-image-upload">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => document.getElementById("pool-image-upload")?.click()}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Images
+              </Button>
+            </label>
+            <input
+              id="pool-image-upload"
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              onChange={handleImageUpload}
+            />
+          </div>
         </Card>
       </div>
 
