@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { ClerkProvider } from "@clerk/nextjs";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ClerkProviderWithTheme } from "@/components/clerk-provider-with-theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -58,20 +58,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body className="antialiased">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ClerkProviderWithTheme>
             <Header />
             {children}
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+          </ClerkProviderWithTheme>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

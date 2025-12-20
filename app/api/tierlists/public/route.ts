@@ -24,9 +24,17 @@ export async function GET() {
     return NextResponse.json(tierlists);
   } catch (error) {
     console.error("Error fetching public tier lists:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const isDbConfigError = errorMessage.includes("DATABASE_URL");
+
     return NextResponse.json(
-      { error: "Failed to fetch tier lists" },
-      { status: 500 }
+      {
+        error: isDbConfigError
+          ? "Database not configured"
+          : "Failed to fetch tier lists",
+        details: process.env.NODE_ENV === "development" ? errorMessage : undefined
+      },
+      { status: isDbConfigError ? 503 : 500 }
     );
   }
 }
