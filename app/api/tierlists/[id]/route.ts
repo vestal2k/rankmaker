@@ -168,6 +168,7 @@ export async function PUT(
                     (item: any, itemIndex: number) => ({
                       mediaUrl: item.mediaUrl,
                       mediaType: item.mediaType || "IMAGE",
+                      coverImageUrl: item.coverImageUrl || null,
                       label: item.label || null,
                       order: itemIndex,
                     })

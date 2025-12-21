@@ -129,6 +129,7 @@ export async function POST(request: NextRequest) {
                 create: (tier.items || []).map((item: any, itemIndex: number) => ({
                   mediaUrl: item.mediaUrl,
                   mediaType: item.mediaType || "IMAGE",
+                  coverImageUrl: item.coverImageUrl || null,
                   label: item.label || null,
                   order: itemIndex,
                 })),
@@ -173,6 +174,7 @@ export async function POST(request: NextRequest) {
               create: (tier.items || []).map((item: any, itemIndex: number) => ({
                 mediaUrl: item.mediaUrl,
                 mediaType: item.mediaType || "IMAGE",
+                coverImageUrl: item.coverImageUrl || null,
                 label: item.label || null,
                 order: itemIndex,
               })),

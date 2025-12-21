@@ -29,6 +29,8 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
+  DragOverEvent,
+  useDroppable,
 } from "@dnd-kit/core";
 import {
   arrayMove,
@@ -45,6 +47,7 @@ interface TierItem {
   id: string;
   mediaUrl: string;
   mediaType: MediaType;
+  coverImageUrl?: string;
   label?: string;
 }
 
@@ -88,17 +91,21 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
       );
     case "AUDIO":
       return (
-        <div className={`relative bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center ${className}`}>
-          <Volume2 className="w-8 h-8 text-white" />
-          <audio
-            src={item.mediaUrl}
-            className="hidden"
-            onMouseEnter={(e) => e.currentTarget.play()}
-            onMouseLeave={(e) => {
-              e.currentTarget.pause();
-              e.currentTarget.currentTime = 0;
-            }}
-          />
+        <div className={`relative ${className}`}>
+          {item.coverImageUrl ? (
+            <img
+              src={item.coverImageUrl}
+              alt={item.label || "Audio cover"}
+              className="w-full h-full object-cover rounded"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center rounded">
+              <Volume2 className="w-8 h-8 text-white" />
+            </div>
+          )}
+          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
+            <Volume2 className="w-3 h-3 text-white" />
+          </div>
         </div>
       );
     case "GIF":
@@ -126,7 +133,7 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
   }
 }
 
-function SortableItem({ item }: { item: TierItem }) {
+function SortableItem({ item, onDelete, onClick }: { item: TierItem; onDelete?: (id: string) => void; onClick?: (item: TierItem) => void }) {
   const {
     attributes,
     listeners,
@@ -149,11 +156,62 @@ function SortableItem({ item }: { item: TierItem }) {
       {...attributes}
       {...listeners}
       className="w-16 h-16 relative group cursor-move"
+      onClick={(e) => {
+        if (onClick && !isDragging) {
+          e.stopPropagation();
+          onClick(item);
+        }
+      }}
     >
       <MediaPreview
         item={item}
         className="border-2 border-transparent hover:border-primary"
       />
+      {onDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(item.id);
+          }}
+          className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold z-10"
+        >
+          ×
+        </button>
+      )}
+    </div>
+  );
+}
+
+function DroppableTierZone({ tier, children, isOver }: { tier: Tier; children: React.ReactNode; isOver: boolean }) {
+  const { setNodeRef } = useDroppable({
+    id: tier.id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex-1 min-h-[80px] p-2 flex flex-wrap gap-2 items-start content-start transition-colors ${
+        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset" : "bg-secondary/20"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DroppablePoolZone({ children, isOver }: { children: React.ReactNode; isOver: boolean }) {
+  const { setNodeRef } = useDroppable({
+    id: "unplaced",
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex flex-wrap gap-2 min-h-[80px] p-2 rounded transition-colors ${
+        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset" : ""
+      }`}
+    >
+      {children}
     </div>
   );
 }
@@ -190,6 +248,8 @@ function CreatePageContent() {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [activeOverId, setActiveOverId] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<TierItem | null>(null);
 
   // Get anonymous ID on mount
   useEffect(() => {
@@ -233,6 +293,7 @@ function CreatePageContent() {
           id: item.id,
           mediaUrl: item.mediaUrl,
           mediaType: item.mediaType || "IMAGE",
+          coverImageUrl: item.coverImageUrl,
           label: item.label,
         })),
       }));
@@ -448,9 +509,127 @@ function CreatePageContent() {
     setActiveItem(item || null);
   };
 
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event;
+    if (!over) {
+      setActiveOverId(null);
+      return;
+    }
+
+    const overId = over.id as string;
+
+    // Check if over a tier container
+    const tier = tiers.find((t) => t.id === overId);
+    if (tier) {
+      setActiveOverId(tier.id);
+      return;
+    }
+
+    if (overId === "unplaced") {
+      setActiveOverId("unplaced");
+      return;
+    }
+
+    // Check if over an item - find its parent tier
+    for (const t of tiers) {
+      if (t.items.some((i) => i.id === overId)) {
+        setActiveOverId(t.id);
+        return;
+      }
+    }
+
+    if (unplacedItems.some((i) => i.id === overId)) {
+      setActiveOverId("unplaced");
+      return;
+    }
+
+    setActiveOverId(null);
+  };
+
+  const handleDeleteItem = (itemId: string) => {
+    // Check in tiers
+    for (const tier of tiers) {
+      if (tier.items.some((i) => i.id === itemId)) {
+        setTiers(
+          tiers.map((t) =>
+            t.id === tier.id
+              ? { ...t, items: t.items.filter((i) => i.id !== itemId) }
+              : t
+          )
+        );
+        return;
+      }
+    }
+
+    // Check in unplaced
+    setUnplacedItems(unplacedItems.filter((i) => i.id !== itemId));
+  };
+
+  const handleUpdateItem = (itemId: string, updates: Partial<TierItem>) => {
+    // Check in tiers
+    for (const tier of tiers) {
+      if (tier.items.some((i) => i.id === itemId)) {
+        setTiers(
+          tiers.map((t) =>
+            t.id === tier.id
+              ? {
+                  ...t,
+                  items: t.items.map((i) =>
+                    i.id === itemId ? { ...i, ...updates } : i
+                  ),
+                }
+              : t
+          )
+        );
+        // Update selectedItem if it's the one being updated
+        if (selectedItem?.id === itemId) {
+          setSelectedItem({ ...selectedItem, ...updates });
+        }
+        return;
+      }
+    }
+
+    // Check in unplaced
+    setUnplacedItems(
+      unplacedItems.map((i) =>
+        i.id === itemId ? { ...i, ...updates } : i
+      )
+    );
+    // Update selectedItem if it's the one being updated
+    if (selectedItem?.id === itemId) {
+      setSelectedItem({ ...selectedItem, ...updates });
+    }
+  };
+
+  const handleAudioCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>, itemId: string) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const formData = new FormData();
+      formData.append("files", file);
+
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload cover image");
+      }
+
+      const data = await response.json();
+      handleUpdateItem(itemId, { coverImageUrl: data.files[0].url });
+    } catch (error) {
+      console.error("Error uploading audio cover:", error);
+      alert("Failed to upload cover image. Please try again.");
+    }
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveItem(null);
+    setActiveOverId(null);
 
     if (!over) return;
 
@@ -587,6 +766,7 @@ function CreatePageContent() {
           items: tier.items.map((item) => ({
             mediaUrl: item.mediaUrl,
             mediaType: item.mediaType,
+            coverImageUrl: item.coverImageUrl,
             label: item.label,
           })),
         })),
@@ -693,6 +873,7 @@ function CreatePageContent() {
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
       <div className="container mx-auto px-4 py-8">
@@ -862,14 +1043,16 @@ function CreatePageContent() {
                   strategy={rectSortingStrategy}
                   id={tier.id}
                 >
-                  <div
-                    className="flex-1 min-h-[100px] p-2 flex flex-wrap gap-2 items-start bg-secondary/20"
-                    data-tier-id={tier.id}
-                  >
+                  <DroppableTierZone tier={tier} isOver={activeOverId === tier.id}>
                     {tier.items.map((item) => (
-                      <SortableItem key={item.id} item={item} />
+                      <SortableItem
+                        key={item.id}
+                        item={item}
+                        onDelete={handleDeleteItem}
+                        onClick={setSelectedItem}
+                      />
                     ))}
-                  </div>
+                  </DroppableTierZone>
                 </SortableContext>
 
                 {/* Controls */}
@@ -936,11 +1119,16 @@ function CreatePageContent() {
             strategy={rectSortingStrategy}
             id="unplaced"
           >
-            <div className="flex flex-wrap gap-2 min-h-[100px]">
+            <DroppablePoolZone isOver={activeOverId === "unplaced"}>
               {unplacedItems.map((item) => (
-                <SortableItem key={item.id} item={item} />
+                <SortableItem
+                  key={item.id}
+                  item={item}
+                  onDelete={handleDeleteItem}
+                  onClick={setSelectedItem}
+                />
               ))}
-            </div>
+            </DroppablePoolZone>
           </SortableContext>
           <div className="mt-4 pt-4 border-t border-border">
             <label htmlFor="pool-media-upload">
@@ -965,6 +1153,78 @@ function CreatePageContent() {
           </div>
         </Card>
       </div>
+
+      {/* Item Preview Modal */}
+      {selectedItem && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedItem(null)}
+        >
+          <div
+            className="relative max-w-4xl max-h-[90vh] bg-background rounded-lg overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedItem(null)}
+              className="absolute top-2 right-2 z-10 w-8 h-8 bg-background/80 hover:bg-background rounded-full flex items-center justify-center text-foreground"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            {selectedItem.mediaType === "VIDEO" ? (
+              <video
+                src={selectedItem.mediaUrl}
+                controls
+                autoPlay
+                className="max-w-full max-h-[85vh] object-contain"
+              />
+            ) : selectedItem.mediaType === "AUDIO" ? (
+              <div className="p-8 flex flex-col items-center gap-4 min-w-[300px]">
+                {selectedItem.coverImageUrl ? (
+                  <div className="relative group">
+                    <img
+                      src={selectedItem.coverImageUrl}
+                      alt="Audio cover"
+                      className="w-48 h-48 object-cover rounded-lg"
+                    />
+                    <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer rounded-lg">
+                      <span className="text-white text-sm font-medium">Change cover</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => handleAudioCoverUpload(e, selectedItem.id)}
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <label className="w-48 h-48 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors bg-gradient-to-br from-purple-500/20 to-purple-700/20">
+                    <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
+                    <span className="text-sm text-muted-foreground">Add cover image</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => handleAudioCoverUpload(e, selectedItem.id)}
+                    />
+                  </label>
+                )}
+                <audio
+                  src={selectedItem.mediaUrl}
+                  controls
+                  autoPlay
+                  className="w-full"
+                />
+              </div>
+            ) : (
+              <img
+                src={selectedItem.mediaUrl}
+                alt={selectedItem.label || ""}
+                className="max-w-full max-h-[85vh] object-contain"
+              />
+            )}
+          </div>
+        </div>
+      )}
 
       <DragOverlay>
         {activeItem ? (
