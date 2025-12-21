@@ -127,7 +127,8 @@ export async function POST(request: NextRequest) {
               order: index,
               items: {
                 create: (tier.items || []).map((item: any, itemIndex: number) => ({
-                  imageUrl: item.imageUrl,
+                  mediaUrl: item.mediaUrl,
+                  mediaType: item.mediaType || "IMAGE",
                   label: item.label || null,
                   order: itemIndex,
                 })),
@@ -170,7 +171,8 @@ export async function POST(request: NextRequest) {
             order: index,
             items: {
               create: (tier.items || []).map((item: any, itemIndex: number) => ({
-                imageUrl: item.imageUrl,
+                mediaUrl: item.mediaUrl,
+                mediaType: item.mediaType || "IMAGE",
                 label: item.label || null,
                 order: itemIndex,
               })),

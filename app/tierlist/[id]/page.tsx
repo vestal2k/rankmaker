@@ -6,14 +6,70 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageCircle, Share2, Edit } from "lucide-react";
+import { Heart, MessageCircle, Share2, Edit, Volume2, Film } from "lucide-react";
 import { getContrastColor } from "@/lib/utils";
+
+type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF";
 
 interface TierItem {
   id: string;
-  imageUrl: string;
+  mediaUrl: string;
+  mediaType: MediaType;
   label: string | null;
   order: number;
+}
+
+function MediaPreview({ item, className = "" }: { item: TierItem; className?: string }) {
+  switch (item.mediaType) {
+    case "VIDEO":
+      return (
+        <div className={`relative ${className}`}>
+          <video
+            src={item.mediaUrl}
+            className="w-full h-full object-cover rounded"
+            muted
+            loop
+            playsInline
+            onMouseEnter={(e) => e.currentTarget.play()}
+            onMouseLeave={(e) => {
+              e.currentTarget.pause();
+              e.currentTarget.currentTime = 0;
+            }}
+          />
+          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
+            <Film className="w-3 h-3 text-white" />
+          </div>
+        </div>
+      );
+    case "AUDIO":
+      return (
+        <div className={`relative bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center rounded ${className}`}>
+          <Volume2 className="w-8 h-8 text-white" />
+        </div>
+      );
+    case "GIF":
+      return (
+        <div className={`relative ${className}`}>
+          <img
+            src={item.mediaUrl}
+            alt={item.label || ""}
+            className="w-full h-full object-cover rounded"
+          />
+          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded px-1">
+            <span className="text-[10px] font-bold text-white">GIF</span>
+          </div>
+        </div>
+      );
+    case "IMAGE":
+    default:
+      return (
+        <img
+          src={item.mediaUrl}
+          alt={item.label || ""}
+          className={`w-full h-full object-cover rounded ${className}`}
+        />
+      );
+  }
 }
 
 interface Tier {
@@ -251,11 +307,7 @@ export default function TierListPage({
                     .sort((a, b) => a.order - b.order)
                     .map((item) => (
                       <div key={item.id} className="w-16 h-16">
-                        <img
-                          src={item.imageUrl}
-                          alt={item.label || ""}
-                          className="w-full h-full object-cover rounded border-2"
-                        />
+                        <MediaPreview item={item} className="border-2" />
                       </div>
                     ))}
                 </div>

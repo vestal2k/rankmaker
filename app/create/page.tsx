@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X } from "lucide-react";
+import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Volume2, Film } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
@@ -38,9 +38,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF";
+
 interface TierItem {
   id: string;
-  imageUrl: string;
+  mediaUrl: string;
+  mediaType: MediaType;
   label?: string;
 }
 
@@ -59,6 +62,68 @@ const DEFAULT_TIERS: Tier[] = [
   { id: "d", name: "D", color: "#bfff7f", items: [] },
   { id: "f", name: "F", color: "#7fff7f", items: [] },
 ];
+
+function MediaPreview({ item, className = "" }: { item: TierItem; className?: string }) {
+  switch (item.mediaType) {
+    case "VIDEO":
+      return (
+        <div className={`relative ${className}`}>
+          <video
+            src={item.mediaUrl}
+            className="w-full h-full object-cover rounded"
+            muted
+            loop
+            playsInline
+            onMouseEnter={(e) => e.currentTarget.play()}
+            onMouseLeave={(e) => {
+              e.currentTarget.pause();
+              e.currentTarget.currentTime = 0;
+            }}
+          />
+          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
+            <Film className="w-3 h-3 text-white" />
+          </div>
+        </div>
+      );
+    case "AUDIO":
+      return (
+        <div className={`relative bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center ${className}`}>
+          <Volume2 className="w-8 h-8 text-white" />
+          <audio
+            src={item.mediaUrl}
+            className="hidden"
+            onMouseEnter={(e) => e.currentTarget.play()}
+            onMouseLeave={(e) => {
+              e.currentTarget.pause();
+              e.currentTarget.currentTime = 0;
+            }}
+          />
+        </div>
+      );
+    case "GIF":
+      return (
+        <div className={`relative ${className}`}>
+          <img
+            src={item.mediaUrl}
+            alt={item.label || ""}
+            className="w-full h-full object-cover rounded"
+          />
+          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded px-1">
+            <span className="text-[10px] font-bold text-white">GIF</span>
+          </div>
+        </div>
+      );
+    case "IMAGE":
+    default:
+      return (
+        <img
+          src={item.mediaUrl}
+          alt={item.label || ""}
+          className={`w-full h-full object-cover rounded ${className}`}
+        />
+      );
+  }
+}
 
 function SortableItem({ item }: { item: TierItem }) {
   const {
@@ -84,10 +149,9 @@ function SortableItem({ item }: { item: TierItem }) {
       {...listeners}
       className="w-16 h-16 relative group cursor-move"
     >
-      <img
-        src={item.imageUrl}
-        alt={item.label || ""}
-        className="w-full h-full object-cover rounded border-2 border-transparent hover:border-primary"
+      <MediaPreview
+        item={item}
+        className="border-2 border-transparent hover:border-primary"
       />
     </div>
   );
@@ -166,7 +230,8 @@ function CreatePageContent() {
         color: tier.color,
         items: tier.items.map((item: any) => ({
           id: item.id,
-          imageUrl: item.imageUrl,
+          mediaUrl: item.mediaUrl,
+          mediaType: item.mediaType || "IMAGE",
           label: item.label,
         })),
       }));
@@ -247,7 +312,7 @@ function CreatePageContent() {
     setTiers(newTiers);
   };
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
@@ -265,21 +330,22 @@ function CreatePageContent() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to upload images");
+        throw new Error("Failed to upload media");
       }
 
       const data = await response.json();
 
-      // Add uploaded images to unplaced items
-      const newItems: TierItem[] = data.files.map((file: { url: string }) => ({
+      // Add uploaded media to unplaced items
+      const newItems: TierItem[] = data.files.map((file: { url: string; mediaType: MediaType }) => ({
         id: `item-${Date.now()}-${Math.random()}`,
-        imageUrl: file.url,
+        mediaUrl: file.url,
+        mediaType: file.mediaType,
       }));
 
       setUnplacedItems((prev) => [...prev, ...newItems]);
     } catch (error) {
-      console.error("Error uploading images:", error);
-      alert("Failed to upload images. Please try again.");
+      console.error("Error uploading media:", error);
+      alert("Failed to upload media. Please try again.");
     }
   };
 
@@ -466,7 +532,8 @@ function CreatePageContent() {
           name: tier.name,
           color: tier.color,
           items: tier.items.map((item) => ({
-            imageUrl: item.imageUrl,
+            mediaUrl: item.mediaUrl,
+            mediaType: item.mediaType,
             label: item.label,
           })),
         })),
@@ -823,24 +890,24 @@ function CreatePageContent() {
             </div>
           </SortableContext>
           <div className="mt-4 pt-4 border-t border-border">
-            <label htmlFor="pool-image-upload">
+            <label htmlFor="pool-media-upload">
               <Button
                 type="button"
                 variant="outline"
                 className="w-full"
-                onClick={() => document.getElementById("pool-image-upload")?.click()}
+                onClick={() => document.getElementById("pool-media-upload")?.click()}
               >
                 <Plus className="w-4 h-4 mr-2" />
-                Add Images
+                Add Media
               </Button>
             </label>
             <input
-              id="pool-image-upload"
+              id="pool-media-upload"
               type="file"
-              accept="image/*"
+              accept="image/*,video/*,audio/*,.gif"
               multiple
               className="hidden"
-              onChange={handleImageUpload}
+              onChange={handleMediaUpload}
             />
           </div>
         </Card>
@@ -848,12 +915,8 @@ function CreatePageContent() {
 
       <DragOverlay>
         {activeItem ? (
-          <div className="w-16 h-16">
-            <img
-              src={activeItem.imageUrl}
-              alt={activeItem.label || ""}
-              className="w-full h-full object-cover rounded opacity-80"
-            />
+          <div className="w-16 h-16 opacity-80">
+            <MediaPreview item={activeItem} />
           </div>
         ) : null}
       </DragOverlay>

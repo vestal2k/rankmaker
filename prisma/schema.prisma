@@ -56,13 +56,21 @@ model Tier {
   @@index([tierListId])
 }
 
+enum MediaType {
+  IMAGE
+  VIDEO
+  AUDIO
+  GIF
+}
+
 model TierItem {
-  id       String  @id @default(cuid())
-  imageUrl String
-  label    String?
-  order    Int
-  tierId   String
-  tier     Tier    @relation(fields: [tierId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  mediaUrl  String
+  mediaType MediaType @default(IMAGE)
+  label     String?
+  order     Int
+  tierId    String
+  tier      Tier      @relation(fields: [tierId], references: [id], onDelete: Cascade)
 
   @@index([tierId])
 }

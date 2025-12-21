@@ -166,7 +166,8 @@ export async function PUT(
                 items: {
                   create: (tier.items || []).map(
                     (item: any, itemIndex: number) => ({
-                      imageUrl: item.imageUrl,
+                      mediaUrl: item.mediaUrl,
+                      mediaType: item.mediaType || "IMAGE",
                       label: item.label || null,
                       order: itemIndex,
                     })
