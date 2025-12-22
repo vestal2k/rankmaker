@@ -169,6 +169,7 @@ export async function PUT(
                       mediaUrl: item.mediaUrl,
                       mediaType: item.mediaType || "IMAGE",
                       coverImageUrl: item.coverImageUrl || null,
+                      embedId: item.embedId || null,
                       label: item.label || null,
                       order: itemIndex,
                     })

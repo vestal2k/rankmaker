@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Volume2, Film } from "lucide-react";
+import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Volume2, Film, Link2, Youtube } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
@@ -41,13 +41,14 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF";
+type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF" | "YOUTUBE" | "TWITTER" | "INSTAGRAM";
 
 interface TierItem {
   id: string;
   mediaUrl: string;
   mediaType: MediaType;
   coverImageUrl?: string;
+  embedId?: string;
   label?: string;
 }
 
@@ -67,8 +68,72 @@ const DEFAULT_TIERS: Tier[] = [
   { id: "f", name: "F", color: "#7fff7f", items: [] },
 ];
 
+// Helper to get YouTube thumbnail from video ID
+function getYouTubeThumbnail(videoId: string): string {
+  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
+}
+
 function MediaPreview({ item, className = "" }: { item: TierItem; className?: string }) {
   switch (item.mediaType) {
+    case "YOUTUBE":
+      return (
+        <div className={`relative ${className}`}>
+          <img
+            src={item.embedId ? getYouTubeThumbnail(item.embedId) : item.coverImageUrl || ""}
+            alt={item.label || "YouTube video"}
+            className="w-full h-full object-cover rounded"
+          />
+          <div className="absolute bottom-0.5 right-0.5 bg-red-600 rounded p-0.5">
+            <Youtube className="w-3 h-3 text-white" />
+          </div>
+        </div>
+      );
+    case "TWITTER":
+      return (
+        <div className={`relative ${className}`}>
+          {item.coverImageUrl ? (
+            <img
+              src={item.coverImageUrl}
+              alt={item.label || "Tweet"}
+              className="w-full h-full object-cover rounded"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center rounded">
+              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </div>
+          )}
+          <div className="absolute bottom-0.5 right-0.5 bg-black rounded p-0.5">
+            <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+          </div>
+        </div>
+      );
+    case "INSTAGRAM":
+      return (
+        <div className={`relative ${className}`}>
+          {item.coverImageUrl ? (
+            <img
+              src={item.coverImageUrl}
+              alt={item.label || "Instagram post"}
+              className="w-full h-full object-cover rounded"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center rounded">
+              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+              </svg>
+            </div>
+          )}
+          <div className="absolute bottom-0.5 right-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded p-0.5">
+            <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+            </svg>
+          </div>
+        </div>
+      );
     case "VIDEO":
       return (
         <div className={`relative ${className}`}>
@@ -250,6 +315,68 @@ function CreatePageContent() {
   } | null>(null);
   const [activeOverId, setActiveOverId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<TierItem | null>(null);
+  const [showEmbedDialog, setShowEmbedDialog] = useState(false);
+  const [embedUrl, setEmbedUrl] = useState("");
+  const [embedError, setEmbedError] = useState<string | null>(null);
+
+  // Parse embed URLs
+  const parseEmbedUrl = (url: string): { type: MediaType; embedId: string; mediaUrl: string } | null => {
+    // YouTube patterns
+    const youtubePatterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+      /youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/,
+    ];
+    for (const pattern of youtubePatterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return { type: "YOUTUBE", embedId: match[1], mediaUrl: url };
+      }
+    }
+
+    // Twitter/X patterns
+    const twitterPatterns = [
+      /(?:twitter\.com|x\.com)\/\w+\/status\/(\d+)/,
+    ];
+    for (const pattern of twitterPatterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return { type: "TWITTER", embedId: match[1], mediaUrl: url };
+      }
+    }
+
+    // Instagram patterns
+    const instagramPatterns = [
+      /instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/,
+    ];
+    for (const pattern of instagramPatterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return { type: "INSTAGRAM", embedId: match[1], mediaUrl: url };
+      }
+    }
+
+    return null;
+  };
+
+  const handleAddEmbed = () => {
+    const parsed = parseEmbedUrl(embedUrl.trim());
+    if (!parsed) {
+      setEmbedError("URL not recognized. Supported: YouTube, Twitter/X, Instagram");
+      return;
+    }
+
+    const newItem: TierItem = {
+      id: `item-${Date.now()}-${Math.random()}`,
+      mediaUrl: parsed.mediaUrl,
+      mediaType: parsed.type,
+      embedId: parsed.embedId,
+    };
+
+    setUnplacedItems((prev) => [...prev, newItem]);
+    setEmbedUrl("");
+    setEmbedError(null);
+    setShowEmbedDialog(false);
+  };
 
   // Get anonymous ID on mount
   useEffect(() => {
@@ -294,6 +421,7 @@ function CreatePageContent() {
           mediaUrl: item.mediaUrl,
           mediaType: item.mediaType || "IMAGE",
           coverImageUrl: item.coverImageUrl,
+          embedId: item.embedId,
           label: item.label,
         })),
       }));
@@ -767,6 +895,7 @@ function CreatePageContent() {
             mediaUrl: item.mediaUrl,
             mediaType: item.mediaType,
             coverImageUrl: item.coverImageUrl,
+            embedId: item.embedId,
             label: item.label,
           })),
         })),
@@ -1130,8 +1259,8 @@ function CreatePageContent() {
               ))}
             </DroppablePoolZone>
           </SortableContext>
-          <div className="mt-4 pt-4 border-t border-border">
-            <label htmlFor="pool-media-upload">
+          <div className="mt-4 pt-4 border-t border-border flex gap-2">
+            <label htmlFor="pool-media-upload" className="flex-1">
               <Button
                 type="button"
                 variant="outline"
@@ -1150,8 +1279,82 @@ function CreatePageContent() {
               className="hidden"
               onChange={handleMediaUpload}
             />
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => setShowEmbedDialog(true)}
+            >
+              <Link2 className="w-4 h-4 mr-2" />
+              Add Link
+            </Button>
           </div>
         </Card>
+
+        {/* Embed Dialog */}
+        {showEmbedDialog && (
+          <div
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => {
+              setShowEmbedDialog(false);
+              setEmbedUrl("");
+              setEmbedError(null);
+            }}
+          >
+            <div
+              className="bg-background rounded-lg p-6 w-full max-w-md"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Add Link</h3>
+                <button
+                  onClick={() => {
+                    setShowEmbedDialog(false);
+                    setEmbedUrl("");
+                    setEmbedError(null);
+                  }}
+                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-secondary"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Paste a YouTube, Twitter/X, or Instagram URL
+              </p>
+              <Input
+                type="url"
+                placeholder="https://youtube.com/watch?v=..."
+                value={embedUrl}
+                onChange={(e) => {
+                  setEmbedUrl(e.target.value);
+                  setEmbedError(null);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleAddEmbed();
+                  }
+                }}
+                className="mb-2"
+              />
+              {embedError && (
+                <p className="text-sm text-destructive mb-4">{embedError}</p>
+              )}
+              <div className="flex gap-2 justify-end">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowEmbedDialog(false);
+                    setEmbedUrl("");
+                    setEmbedError(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleAddEmbed}>Add</Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Item Preview Modal */}
@@ -1170,7 +1373,56 @@ function CreatePageContent() {
             >
               <X className="w-5 h-5" />
             </button>
-            {selectedItem.mediaType === "VIDEO" ? (
+            {selectedItem.mediaType === "YOUTUBE" && selectedItem.embedId ? (
+              <div className="w-[560px] max-w-full aspect-video">
+                <iframe
+                  src={`https://www.youtube.com/embed/${selectedItem.embedId}?autoplay=1`}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            ) : selectedItem.mediaType === "TWITTER" && selectedItem.embedId ? (
+              <div className="p-6 min-w-[300px] max-w-[550px]">
+                <div className="flex items-center gap-2 mb-4">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  <span className="font-semibold">Tweet</span>
+                </div>
+                <a
+                  href={selectedItem.mediaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline block mb-4"
+                >
+                  View on X/Twitter
+                </a>
+                <p className="text-sm text-muted-foreground">
+                  Tweet ID: {selectedItem.embedId}
+                </p>
+              </div>
+            ) : selectedItem.mediaType === "INSTAGRAM" && selectedItem.embedId ? (
+              <div className="p-6 min-w-[300px] max-w-[550px]">
+                <div className="flex items-center gap-2 mb-4">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                  </svg>
+                  <span className="font-semibold">Instagram</span>
+                </div>
+                <a
+                  href={selectedItem.mediaUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline block mb-4"
+                >
+                  View on Instagram
+                </a>
+                <p className="text-sm text-muted-foreground">
+                  Post ID: {selectedItem.embedId}
+                </p>
+              </div>
+            ) : selectedItem.mediaType === "VIDEO" ? (
               <video
                 src={selectedItem.mediaUrl}
                 controls

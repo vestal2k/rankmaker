@@ -61,6 +61,9 @@ enum MediaType {
   VIDEO
   AUDIO
   GIF
+  YOUTUBE
+  TWITTER
+  INSTAGRAM
 }
 
 model TierItem {
@@ -68,6 +71,7 @@ model TierItem {
   mediaUrl      String
   mediaType     MediaType @default(IMAGE)
   coverImageUrl String?   // Cover image for audio items
+  embedId       String?   // ID for embeds (YouTube videoId, Tweet ID, Instagram post ID)
   label         String?
   order         Int
   tierId        String
