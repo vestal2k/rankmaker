@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser, SignInButton } from "@clerk/nextjs";
 import { upload } from "@vercel/blob/client";
@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Volume2, Film, Link2, Youtube } from "lucide-react";
+import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Volume2, Film, Link2, Youtube, Undo2, Redo2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
@@ -58,6 +58,13 @@ interface Tier {
   color: string;
   items: TierItem[];
 }
+
+interface HistoryState {
+  tiers: Tier[];
+  unplacedItems: TierItem[];
+}
+
+const MAX_HISTORY_SIZE = 50;
 
 const DEFAULT_TIERS: Tier[] = [
   { id: "s", name: "S", color: "#ff7f7f", items: [] },
@@ -318,6 +325,118 @@ function CreatePageContent() {
   const [showEmbedDialog, setShowEmbedDialog] = useState(false);
   const [embedUrl, setEmbedUrl] = useState("");
   const [embedError, setEmbedError] = useState<string | null>(null);
+
+  // History management for undo/redo
+  const [history, setHistory] = useState<HistoryState[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const isUndoRedoAction = useRef(false);
+
+  // Save current state to history
+  const saveToHistory = useCallback((newTiers: Tier[], newUnplacedItems: TierItem[]) => {
+    if (isUndoRedoAction.current) {
+      isUndoRedoAction.current = false;
+      return;
+    }
+
+    setHistory(prev => {
+      // Remove any future history if we're not at the end
+      const newHistory = prev.slice(0, historyIndex + 1);
+      // Add new state
+      const updated = [...newHistory, { tiers: newTiers, unplacedItems: newUnplacedItems }];
+      // Limit history size
+      if (updated.length > MAX_HISTORY_SIZE) {
+        return updated.slice(-MAX_HISTORY_SIZE);
+      }
+      return updated;
+    });
+    setHistoryIndex(prev => Math.min(prev + 1, MAX_HISTORY_SIZE - 1));
+  }, [historyIndex]);
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
+
+  const handleUndo = useCallback(() => {
+    if (!canUndo) return;
+    isUndoRedoAction.current = true;
+    const prevState = history[historyIndex - 1];
+    setTiers(prevState.tiers);
+    setUnplacedItems(prevState.unplacedItems);
+    setHistoryIndex(prev => prev - 1);
+  }, [canUndo, history, historyIndex]);
+
+  const handleRedo = useCallback(() => {
+    if (!canRedo) return;
+    isUndoRedoAction.current = true;
+    const nextState = history[historyIndex + 1];
+    setTiers(nextState.tiers);
+    setUnplacedItems(nextState.unplacedItems);
+    setHistoryIndex(prev => prev + 1);
+  }, [canRedo, history, historyIndex]);
+
+  // Initialize history with initial state
+  useEffect(() => {
+    if (history.length === 0) {
+      setHistory([{ tiers: DEFAULT_TIERS, unplacedItems: [] }]);
+      setHistoryIndex(0);
+    }
+  }, [history.length]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Check if user is typing in an input field
+      const target = e.target as HTMLElement;
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+
+      // Escape key - close modals/dialogs
+      if (e.key === 'Escape') {
+        if (selectedItem) {
+          setSelectedItem(null);
+          return;
+        }
+        if (showEmbedDialog) {
+          setShowEmbedDialog(false);
+          setEmbedUrl("");
+          setEmbedError(null);
+          return;
+        }
+      }
+
+      // Skip other shortcuts if typing
+      if (isTyping) return;
+
+      // Ctrl+Z: Undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      // Ctrl+Y or Ctrl+Shift+Z: Redo
+      else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
+      // Ctrl+S: Save
+      else if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (!isSaving) handleSave();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleUndo, handleRedo, selectedItem, showEmbedDialog, isSaving]);
+
+  // Save to history when tiers or unplacedItems change
+  useEffect(() => {
+    if (!isUndoRedoAction.current && history.length > 0) {
+      const currentState = history[historyIndex];
+      if (currentState &&
+          (JSON.stringify(currentState.tiers) !== JSON.stringify(tiers) ||
+           JSON.stringify(currentState.unplacedItems) !== JSON.stringify(unplacedItems))) {
+        saveToHistory(tiers, unplacedItems);
+      }
+    }
+  }, [tiers, unplacedItems, history, historyIndex, saveToHistory]);
 
   // Parse embed URLs
   const parseEmbedUrl = (url: string): { type: MediaType; embedId: string; mediaUrl: string } | null => {
@@ -1082,6 +1201,14 @@ function CreatePageContent() {
           </div>
 
           <div className="flex gap-2 flex-wrap">
+            <Button onClick={handleUndo} variant="outline" disabled={!canUndo} title="Undo (Ctrl+Z)">
+              <Undo2 className="w-4 h-4" />
+            </Button>
+
+            <Button onClick={handleRedo} variant="outline" disabled={!canRedo} title="Redo (Ctrl+Y)">
+              <Redo2 className="w-4 h-4" />
+            </Button>
+
             <Button onClick={addTier} variant="outline">
               <Plus className="w-4 h-4 mr-2" />
               Add Tier
