@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Volume2, Film, Link2, Youtube, Undo2, Redo2 } from "lucide-react";
+import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Volume2, Film, Link2, Youtube, Undo2, Redo2, LayoutTemplate } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
@@ -73,6 +73,76 @@ const DEFAULT_TIERS: Tier[] = [
   { id: "c", name: "C", color: "#ffff7f", items: [] },
   { id: "d", name: "D", color: "#bfff7f", items: [] },
   { id: "f", name: "F", color: "#7fff7f", items: [] },
+];
+
+interface TierTemplate {
+  name: string;
+  description: string;
+  tiers: Omit<Tier, 'id'>[];
+}
+
+const TIER_TEMPLATES: TierTemplate[] = [
+  {
+    name: "Standard (S-F)",
+    description: "Classic tier list with S, A, B, C, D, F rankings",
+    tiers: [
+      { name: "S", color: "#ff7f7f", items: [] },
+      { name: "A", color: "#ffbf7f", items: [] },
+      { name: "B", color: "#ffdf7f", items: [] },
+      { name: "C", color: "#ffff7f", items: [] },
+      { name: "D", color: "#bfff7f", items: [] },
+      { name: "F", color: "#7fff7f", items: [] },
+    ],
+  },
+  {
+    name: "Simple (S-A-B-C)",
+    description: "Simplified tier list with 4 tiers",
+    tiers: [
+      { name: "S", color: "#ff7f7f", items: [] },
+      { name: "A", color: "#ffbf7f", items: [] },
+      { name: "B", color: "#ffdf7f", items: [] },
+      { name: "C", color: "#bfff7f", items: [] },
+    ],
+  },
+  {
+    name: "Top/Mid/Bottom",
+    description: "Simple 3-tier ranking system",
+    tiers: [
+      { name: "Top", color: "#4ade80", items: [] },
+      { name: "Mid", color: "#facc15", items: [] },
+      { name: "Bottom", color: "#f87171", items: [] },
+    ],
+  },
+  {
+    name: "Numeric (1-5)",
+    description: "Numbered ranking from 1 to 5",
+    tiers: [
+      { name: "1", color: "#4ade80", items: [] },
+      { name: "2", color: "#86efac", items: [] },
+      { name: "3", color: "#fde047", items: [] },
+      { name: "4", color: "#fb923c", items: [] },
+      { name: "5", color: "#f87171", items: [] },
+    ],
+  },
+  {
+    name: "Yes/Maybe/No",
+    description: "Decision-based tier list",
+    tiers: [
+      { name: "Yes", color: "#4ade80", items: [] },
+      { name: "Maybe", color: "#fde047", items: [] },
+      { name: "No", color: "#f87171", items: [] },
+    ],
+  },
+  {
+    name: "Love/Like/OK/Dislike",
+    description: "Preference-based ranking",
+    tiers: [
+      { name: "Love", color: "#f472b6", items: [] },
+      { name: "Like", color: "#4ade80", items: [] },
+      { name: "OK", color: "#fde047", items: [] },
+      { name: "Dislike", color: "#f87171", items: [] },
+    ],
+  },
 ];
 
 // Helper to get YouTube thumbnail from video ID
@@ -495,6 +565,20 @@ function CreatePageContent() {
     setEmbedUrl("");
     setEmbedError(null);
     setShowEmbedDialog(false);
+  };
+
+  const handleApplyTemplate = (template: TierTemplate) => {
+    // Move all current items to unplaced
+    const allItems = tiers.flatMap(tier => tier.items);
+    setUnplacedItems(prev => [...prev, ...allItems]);
+
+    // Apply template with unique IDs
+    const newTiers = template.tiers.map((tier, index) => ({
+      ...tier,
+      id: `tier-${Date.now()}-${index}`,
+      items: [],
+    }));
+    setTiers(newTiers);
   };
 
   // Get anonymous ID on mount
@@ -1213,6 +1297,27 @@ function CreatePageContent() {
               <Plus className="w-4 h-4 mr-2" />
               Add Tier
             </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  <LayoutTemplate className="w-4 h-4 mr-2" />
+                  Template
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                {TIER_TEMPLATES.map((template, index) => (
+                  <DropdownMenuItem
+                    key={index}
+                    onClick={() => handleApplyTemplate(template)}
+                    className="flex flex-col items-start"
+                  >
+                    <span className="font-medium">{template.name}</span>
+                    <span className="text-xs text-muted-foreground">{template.description}</span>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <Button onClick={handleSave} disabled={isSaving} variant="default">
               <Save className="w-4 h-4 mr-2" />
