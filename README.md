@@ -1,185 +1,105 @@
-# 🎯 Rankmaker
+<div align="center">
+  
+  <img src="public/logo.png" alt="Project Logo" width="72" height="72" />
+  <h1>🎯 Rankmaker</h1>
+  <p><em>A modern, feature-rich tier list creation platform</em></p>
 
-A modern, feature-rich tier list creation platform - an improved version of tiermaker.com with enhanced UX, social features, and cloud storage.
+  <!-- Header buttons -->
+  <p>
+    <a href="https://rankmaker.vercel.app/">
+      <img src="https://img.shields.io/badge/🌐 Rankmaker-000?style=for-the-badge" alt="Live Demo"/>
+    </a>
+    <a href="https://github.com/vestal2k/rankmaker">
+      <img src="https://img.shields.io/badge/📂 Repository-000?style=for-the-badge&logo=github" alt="Repository"/>
+    </a>
+  </p>
 
-## ✨ Features
-
-### ✅ Core Features
-- **Drag & Drop Builder**: Smooth, intuitive tier list creation with dnd-kit
-- **Customizable Tiers**: Add/remove tiers, customize names and colors
-- **Cloud Image Storage**: Upload images to Vercel Blob for permanent URLs
-- **PNG Export**: Download tier lists as high-quality images
-- **No Login Required**: Create tier lists without signing up, login only required to save
-- **Modern UI**: Built with Tailwind CSS and shadcn/ui components
-- **Authentication**: Secure auth via Clerk
-- **Database**: Neon PostgreSQL + Prisma ORM v7
-
-### ✅ Social Features
-- **Explore Page**: Discover public tier lists created by the community
-- **User Profiles**: View tier lists by username
-- **Likes System**: Like tier lists you enjoy
-- **Comments**: Discuss and share opinions on tier lists
-- **Public/Private Toggle**: Control who can see your tier lists
-
-### ✅ Polish & UX
-- **Dark Mode**: Apple-style dark theme (#161618) with system detection
-- **Responsive Design**: Works beautifully on all devices
-- **SEO Optimized**: OpenGraph and Twitter card metadata
-- **Marketing Homepage**: Professional landing page with features showcase
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Next.js 15 (App Router) + TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Drag & Drop**: @dnd-kit
-- **Authentication**: Clerk
-- **Database**: Neon PostgreSQL + Prisma ORM v7
-- **Cloud Storage**: Vercel Blob
-- **Image Export**: html2canvas
-- **Theme**: next-themes
-- **Deployment**: Vercel
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 20+ installed
-- pnpm installed (`npm install -g pnpm`)
-- Clerk account ([dashboard.clerk.com](https://dashboard.clerk.com))
-- Neon PostgreSQL database ([neon.tech](https://neon.tech))
-
-### Installation
-
-1. **Clone the repository**
-
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
-
-3. **Set up environment variables**
-
-   Copy `.env.example` to `.env.local`:
-   ```bash
-   cp .env.example .env.local
-   ```
-
-   Then fill in your credentials:
-   ```env
-   # Get from https://dashboard.clerk.com
-   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-   CLERK_SECRET_KEY=sk_test_...
-
-   # Get from https://neon.tech
-   DATABASE_URL=postgresql://...
-
-   # Vercel Blob (auto-configured on Vercel deployment)
-   BLOB_READ_WRITE_TOKEN=vercel_blob_...
-
-   # Optional: Base URL for metadata
-   NEXT_PUBLIC_APP_URL=https://rankmaker.vercel.app
-   ```
-
-4. **Run database migrations**
-   ```bash
-   pnpm prisma generate
-   pnpm prisma db push
-   ```
-
-5. **Start the development server**
-   ```bash
-   pnpm dev
-   ```
-
-6. **Open your browser**
-
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 📁 Project Structure
-
-```
-rankmaker/
-├── app/                           # Next.js app directory
-│   ├── api/                      # API routes
-│   │   ├── tierlists/           # CRUD operations for tier lists
-│   │   ├── upload/              # Image upload to Vercel Blob
-│   │   └── users/               # User profile endpoints
-│   ├── create/                  # Tier list builder page
-│   ├── explore/                 # Public feed of tier lists
-│   ├── profile/[username]/      # User profile pages
-│   ├── tierlist/[id]/          # Tier list detail view
-│   ├── sign-in/                # Authentication pages
-│   ├── sign-up/
-│   ├── layout.tsx              # Root layout with providers
-│   ├── page.tsx                # Marketing homepage
-│   └── globals.css             # Global styles & dark theme
-├── components/                  # React components
-│   ├── ui/                     # shadcn/ui components
-│   ├── header.tsx              # Navigation header
-│   ├── theme-provider.tsx      # Dark mode provider
-│   └── theme-toggle.tsx        # Theme toggle button
-├── lib/                        # Utilities
-│   └── db.ts                   # Prisma client instance
-├── prisma/                     # Database
-│   ├── schema.prisma           # Database schema
-│   └── prisma.config.ts        # Prisma v7 config
-└── .claude/                    # Project documentation (not committed)
-```
-
-## 🎨 Usage
-
-### Creating a Tier List
-
-1. Navigate to `/create` or click "Start Creating" on the homepage
-2. Click "Add Images" to upload items (stored in Vercel Blob)
-3. Drag images into different tiers
-4. Customize tier names and colors
-5. Toggle public/private visibility
-6. Click "Save" to store your tier list (requires login)
-7. Click "Export PNG" to download as an image
-
-### Exploring Tier Lists
-
-1. Visit `/explore` to see all public tier lists
-2. Click on any tier list to view details
-3. Like and comment on tier lists you enjoy
-4. Click on usernames to view their profile
-
-## 🎨 Dark Mode
-
-The dark theme uses Apple's signature color (#161618) for a premium, modern look. Users can toggle between light, dark, or system preference in the header.
-
-## 📝 Development Notes
-
-- Using Prisma 7 with new config format (`prisma.config.ts`)
-- Authentication fully handled by Clerk (no manual password management)
-- Images stored in Vercel Blob with public URLs and random suffixes
-- Next.js 15 requires async params in API routes and dynamic pages
-- Build includes automatic Prisma generation via postinstall hook
-- useSearchParams wrapped in Suspense boundary for static generation
-
-## 🚀 Deployment
-
-This project is optimized for Vercel deployment:
-
-1. Push your code to GitHub
-2. Import project in Vercel
-3. Add environment variables (BLOB_READ_WRITE_TOKEN is auto-configured)
-4. Deploy!
-
-The build process automatically:
-- Generates Prisma Client
-- Builds Next.js with optimizations
-- Configures Vercel Blob storage
-
-## 🤝 Contributing
-
-This is a personal project, but suggestions and feedback are welcome!
-
-## 📄 License
-
-MIT License - feel free to use this project as inspiration for your own!
+  <!-- Screenshot -->
+  <p align="center">
+    <img alt="Project Screenshot" src="" width="100%" style="max-width:900px;border-radius:12px;box-shadow:0 0 15px rgba(0,0,0,0.3);">
+  </p>
+  <br>
+</div>
 
 ---
 
-Built with ❤️ using Next.js, Prisma, and modern web technologies
+## ⚡ Features
+
+<div align="center">
+<table>
+<tr>
+<td>
+
+### 🎨 Design
+
+</td>
+<td>
+
+### ⚙️ Technical
+
+
+</td>
+<td>
+
+### 🌟 Experience
+
+
+</td>
+</tr>
+</table>
+</div>
+
+---
+
+## 🧰 Tech Stack
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=" />
+</p>
+
+---
+
+## 💬 Feedback
+If you enjoyed the project, leave a ⭐ or share it!
+I’d love to hear your thoughts and ideas.
+
+---
+
+## 🤝 Contributing
+Contributions are welcome!
+Feel free to open a pull request or an issue to suggest improvements.
+
+---
+
+## 📜 License
+This project is under the **[MIT license](LICENSE)** – free to use with attribution.
+
+---
+
+## 📈 Growth
+
+> 📊 Follow the evolution of the project over time
+
+<div align="center">
+<a href="https://star-history.com/#vestal2k/repo&Timeline">
+  <picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=vestal2k/repo&type=Timeline&theme=dark" />
+  <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=vestal2k/repo&type=Timeline" />
+  <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=vestal2k/repo&type=Timeline" />
+  </picture>
+</a>
+</div>
+
+---
+
+<br>
+
+<p align="center" style="margin-top: 16px; margin-bottom: 0;">
+  <a href="https://ko-fi.com/vestal2k">
+    <img src="https://img.shields.io/badge/☕️%20Support%20on%20Ko--fi-ff5e5b?style=for-the-badge" alt="Ko-fi"/>
+  </a>
+</p>
+
+<p align="center" style="margin-top: 6px;">
+  🖤 Project developed by <a href="https://github.com/vestal2k">Vestal</a>
+</p>

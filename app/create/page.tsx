@@ -1259,82 +1259,100 @@ function CreatePageContent() {
     >
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="text-2xl font-bold mb-4"
-            placeholder="Tier List Title"
-          />
+          {/* Tierlist Settings Card */}
+          <Card className="p-4 mb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <Settings className="w-5 h-5 text-muted-foreground" />
+              <h2 className="font-semibold">Tierlist Settings</h2>
+            </div>
 
-          <Textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mb-4"
-            placeholder="Add a description for your tier list (optional)"
-            rows={2}
-          />
-
-          {/* Cover Image */}
-          <div className="mb-4">
-            <Label className="text-sm font-medium mb-2 block">Cover Image (optional)</Label>
-            {coverImageUrl ? (
-              <div className="relative w-full max-w-md h-32 rounded-lg overflow-hidden border border-border">
-                <img
-                  src={coverImageUrl}
-                  alt="Cover"
-                  className="w-full h-full object-cover"
-                />
-                <Button
-                  size="icon"
-                  variant="destructive"
-                  className="absolute top-2 right-2 w-6 h-6"
-                  onClick={() => setCoverImageUrl(null)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ) : (
-              <label
-              htmlFor="cover-image-upload"
-              onContextMenu={(e) => e.preventDefault()}
-            >
-                <div className="w-full max-w-md h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
-                  {isUploadingCover ? (
-                    <span className="text-muted-foreground">Uploading...</span>
-                  ) : (
-                    <div className="flex flex-col items-center text-muted-foreground">
-                      <ImageIcon className="w-8 h-8 mb-2" />
-                      <span className="text-sm">Click to upload cover image</span>
-                    </div>
-                  )}
+            <div className="grid gap-4 md:grid-cols-2">
+              {/* Left column: Title, Description, Visibility */}
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Title</Label>
+                  <Input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="text-lg font-semibold"
+                    placeholder="Tier List Title"
+                  />
                 </div>
-                <input
-                  id="cover-image-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleCoverImageUpload}
-                  disabled={isUploadingCover}
-                />
-              </label>
-            )}
-          </div>
 
-          <div className="flex items-center gap-2 mb-4">
-            <Switch
-              id="public-toggle"
-              checked={isSignedIn ? isPublic : false}
-              onCheckedChange={setIsPublic}
-              disabled={!isSignedIn}
-            />
-            <Label htmlFor="public-toggle" className={`cursor-pointer ${!isSignedIn ? "text-muted-foreground" : ""}`}>
-              {isSignedIn ? (isPublic ? "Public" : "Private") : "Private"} tier list
-              {!isSignedIn && (
-                <span className="text-xs ml-2">(Sign in to publish publicly)</span>
-              )}
-            </Label>
-          </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Description (optional)</Label>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Add a description for your tier list"
+                    rows={3}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="public-toggle"
+                    checked={isSignedIn ? isPublic : false}
+                    onCheckedChange={setIsPublic}
+                    disabled={!isSignedIn}
+                  />
+                  <Label htmlFor="public-toggle" className={`cursor-pointer ${!isSignedIn ? "text-muted-foreground" : ""}`}>
+                    {isSignedIn ? (isPublic ? "Public" : "Private") : "Private"} tier list
+                    {!isSignedIn && (
+                      <span className="text-xs ml-2">(Sign in to publish publicly)</span>
+                    )}
+                  </Label>
+                </div>
+              </div>
+
+              {/* Right column: Cover Image */}
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Cover Image (optional)</Label>
+                {coverImageUrl ? (
+                  <div className="relative w-full h-40 rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={coverImageUrl}
+                      alt="Cover"
+                      className="w-full h-full object-cover"
+                    />
+                    <Button
+                      size="icon"
+                      variant="destructive"
+                      className="absolute top-2 right-2 w-6 h-6"
+                      onClick={() => setCoverImageUrl(null)}
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label
+                    htmlFor="cover-image-upload"
+                    onContextMenu={(e) => e.preventDefault()}
+                  >
+                    <div className="w-full h-40 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
+                      {isUploadingCover ? (
+                        <span className="text-muted-foreground">Uploading...</span>
+                      ) : (
+                        <div className="flex flex-col items-center text-muted-foreground">
+                          <ImageIcon className="w-8 h-8 mb-2" />
+                          <span className="text-sm">Click to upload cover image</span>
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      id="cover-image-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleCoverImageUpload}
+                      disabled={isUploadingCover}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
+          </Card>
 
           <div className="flex gap-2 flex-wrap">
             <Button onClick={handleUndo} variant="outline" disabled={!canUndo} title="Undo (Ctrl+Z)">
@@ -1434,18 +1452,15 @@ function CreatePageContent() {
               <div className="flex">
                 {/* Tier Label */}
                 <div
-                  className="w-24 flex items-center justify-center font-bold text-lg shrink-0 p-2"
+                  className="min-w-24 max-w-48 flex items-center justify-center font-bold text-lg shrink-0 p-2"
                   style={{ backgroundColor: tier.color }}
                 >
                   <Input
                     value={tier.name}
                     onChange={(e) => updateTierName(tier.id, e.target.value)}
-                    className="text-center border-none bg-transparent font-bold text-lg w-full break-words overflow-wrap-anywhere leading-tight"
+                    className="text-center border-none bg-transparent font-bold text-lg w-full"
                     style={{
                       color: getContrastColor(tier.color),
-                      wordBreak: 'break-word',
-                      overflowWrap: 'anywhere',
-                      whiteSpace: 'normal'
                     }}
                   />
                 </div>
@@ -1492,17 +1507,19 @@ function CreatePageContent() {
                         Move Down
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem asChild>
-                        <label className="flex items-center cursor-pointer">
-                          <Palette className="w-4 h-4 mr-2" />
-                          Change Color
-                          <input
-                            type="color"
-                            value={tier.color}
-                            onChange={(e) => updateTierColor(tier.id, e.target.value)}
-                            className="w-0 h-0 opacity-0 absolute"
-                          />
-                        </label>
+                      <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()}
+                        className="flex items-center cursor-pointer gap-2"
+                      >
+                        <Palette className="w-4 h-4" />
+                        <span>Color</span>
+                        <input
+                          type="color"
+                          value={tier.color}
+                          onChange={(e) => updateTierColor(tier.id, e.target.value)}
+                          className="w-8 h-6 cursor-pointer rounded border border-border ml-auto"
+                          onClick={(e) => e.stopPropagation()}
+                        />
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => addTierAfter(tier.id)}>
                         <Plus className="w-4 h-4 mr-2" />
