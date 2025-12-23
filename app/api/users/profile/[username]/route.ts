@@ -20,10 +20,15 @@ export async function GET(
           select: {
             id: true,
             title: true,
+            description: true,
+            coverImageUrl: true,
             isPublic: true,
             createdAt: true,
+            votes: {
+              select: { value: true },
+            },
             _count: {
-              select: { likes: true, comments: true },
+              select: { votes: true, comments: true },
             },
           },
           orderBy: { createdAt: "desc" },
@@ -38,7 +43,30 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    // Calculate vote scores for each tierlist and total stats
+    let totalVoteScore = 0;
+    let totalComments = 0;
+
+    const tierlistsWithScore = user.tierlists.map((tierlist) => {
+      const voteScore = tierlist.votes.reduce((sum, vote) => sum + vote.value, 0);
+      totalVoteScore += voteScore;
+      totalComments += tierlist._count.comments;
+      return {
+        ...tierlist,
+        voteScore,
+        votes: undefined,
+      };
+    });
+
+    return NextResponse.json({
+      ...user,
+      tierlists: tierlistsWithScore,
+      stats: {
+        totalTierlists: user._count.tierlists,
+        totalVoteScore,
+        totalComments,
+      },
+    });
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return NextResponse.json(

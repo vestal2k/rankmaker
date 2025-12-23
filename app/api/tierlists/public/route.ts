@@ -13,15 +13,25 @@ export async function GET() {
             imageUrl: true,
           },
         },
+        votes: {
+          select: { value: true },
+        },
         _count: {
-          select: { likes: true, comments: true },
+          select: { votes: true, comments: true },
         },
       },
       orderBy: { createdAt: "desc" },
       take: 50, // Limit to 50 most recent
     });
 
-    return NextResponse.json(tierlists);
+    // Calculate vote score for each tierlist
+    const tierlistsWithScore = tierlists.map((tierlist) => ({
+      ...tierlist,
+      voteScore: tierlist.votes.reduce((sum, vote) => sum + vote.value, 0),
+      votes: undefined, // Remove raw votes from response
+    }));
+
+    return NextResponse.json(tierlistsWithScore);
   } catch (error) {
     console.error("Error fetching public tier lists:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

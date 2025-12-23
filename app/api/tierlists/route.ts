@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
             orderBy: { order: "asc" },
           },
           _count: {
-            select: { likes: true, comments: true },
+            select: { votes: true, comments: true },
           },
         },
         orderBy: { createdAt: "desc" },
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
             orderBy: { order: "asc" },
           },
           _count: {
-            select: { likes: true, comments: true },
+            select: { votes: true, comments: true },
           },
         },
         orderBy: { createdAt: "desc" },

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Heart, MessageCircle, Share2, Edit, Volume2, Film, Youtube } from "lucide-react";
+import { ArrowBigUp, ArrowBigDown, MessageCircle, Share2, Edit, Volume2, Film, Youtube, Bookmark, Copy, Link2 } from "lucide-react";
 import { getContrastColor } from "@/lib/utils";
 
 type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF" | "YOUTUBE" | "TWITTER" | "INSTAGRAM";
@@ -183,9 +183,9 @@ interface TierListDetail {
   };
   tiers: Tier[];
   comments: Comment[];
-  likes: { userId: string }[];
+  votes: { userId: string; value: number }[];
   _count: {
-    likes: number;
+    votes: number;
     comments: number;
   };
 }
@@ -199,9 +199,12 @@ export default function TierListPage({
   const { user, isSignedIn } = useUser();
   const [tierlist, setTierlist] = useState<TierListDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
+  const [userVote, setUserVote] = useState<number | null>(null);
+  const [voteScore, setVoteScore] = useState(0);
+  const [isSaved, setIsSaved] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
 
   useEffect(() => {
     loadTierList();
@@ -214,9 +217,29 @@ export default function TierListPage({
       const data = await response.json();
       setTierlist(data);
 
-      // Check if user has liked this tierlist
-      if (isSignedIn && data.likes) {
-        setIsLiked(data.likes.some((like: any) => like.userId === user?.id));
+      // Calculate vote score
+      if (data.votes) {
+        const score = data.votes.reduce((sum: number, vote: { value: number }) => sum + vote.value, 0);
+        setVoteScore(score);
+      }
+
+      // Check user's vote
+      if (isSignedIn && data.votes) {
+        const userVoteData = data.votes.find((vote: any) => vote.userId === user?.id);
+        setUserVote(userVoteData?.value ?? null);
+      }
+
+      // Check if user has saved this tierlist
+      if (isSignedIn) {
+        try {
+          const savedResponse = await fetch(`/api/tierlists/${resolvedParams.id}/save`);
+          if (savedResponse.ok) {
+            const savedData = await savedResponse.json();
+            setIsSaved(savedData.isSaved);
+          }
+        } catch {
+          // Ignore errors for save status
+        }
       }
     } catch (error) {
       console.error("Error loading tier list:", error);
@@ -225,28 +248,77 @@ export default function TierListPage({
     }
   };
 
-  const handleLike = async () => {
+  const handleVote = async (value: 1 | -1) => {
     if (!isSignedIn) return;
 
     try {
-      const response = await fetch(`/api/tierlists/${resolvedParams.id}/like`, {
-        method: isLiked ? "DELETE" : "POST",
+      const response = await fetch(`/api/tierlists/${resolvedParams.id}/vote`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ value }),
       });
 
-      if (!response.ok) throw new Error("Failed to toggle like");
+      if (!response.ok) throw new Error("Failed to vote");
 
-      setIsLiked(!isLiked);
-      if (tierlist) {
-        setTierlist({
-          ...tierlist,
-          _count: {
-            ...tierlist._count,
-            likes: tierlist._count.likes + (isLiked ? -1 : 1),
-          },
-        });
+      const data = await response.json();
+
+      // Update local state
+      const oldVote = userVote;
+      const newVote = data.userVote;
+      setUserVote(newVote);
+
+      // Calculate score change
+      let scoreChange = 0;
+      if (oldVote === null && newVote !== null) {
+        scoreChange = newVote;
+      } else if (oldVote !== null && newVote === null) {
+        scoreChange = -oldVote;
+      } else if (oldVote !== null && newVote !== null) {
+        scoreChange = newVote - oldVote;
       }
+      setVoteScore((prev) => prev + scoreChange);
     } catch (error) {
-      console.error("Error toggling like:", error);
+      console.error("Error voting:", error);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!isSignedIn) return;
+
+    try {
+      const response = await fetch(`/api/tierlists/${resolvedParams.id}/save`, {
+        method: isSaved ? "DELETE" : "POST",
+      });
+
+      if (!response.ok) throw new Error("Failed to toggle save");
+      setIsSaved(!isSaved);
+    } catch (error) {
+      console.error("Error toggling save:", error);
+    }
+  };
+
+  const handleCopyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (error) {
+      console.error("Error copying link:", error);
+    }
+  };
+
+  const handleShare = (platform: string) => {
+    const url = encodeURIComponent(window.location.href);
+    const title = encodeURIComponent(tierlist?.title || "Check out this tier list!");
+
+    const shareUrls: Record<string, string> = {
+      twitter: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      reddit: `https://reddit.com/submit?url=${url}&title=${title}`,
+    };
+
+    if (shareUrls[platform]) {
+      window.open(shareUrls[platform], "_blank", "width=600,height=400");
     }
   };
 
@@ -346,19 +418,95 @@ export default function TierListPage({
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-4">
-          <Button
-            onClick={handleLike}
-            variant={isLiked ? "default" : "outline"}
-            size="sm"
-            disabled={!isSignedIn}
-          >
-            <Heart className={`w-4 h-4 mr-2 ${isLiked ? "fill-current" : ""}`} />
-            {tierlist._count.likes}
-          </Button>
-          <div className="flex items-center gap-2 text-gray-600">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Vote buttons */}
+          <div className="flex items-center border rounded-lg overflow-hidden">
+            <Button
+              onClick={() => handleVote(1)}
+              variant="ghost"
+              size="sm"
+              disabled={!isSignedIn}
+              className={`rounded-none ${userVote === 1 ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400" : ""}`}
+              title={isSignedIn ? "Upvote" : "Sign in to vote"}
+            >
+              <ArrowBigUp className={`w-5 h-5 ${userVote === 1 ? "fill-current" : ""}`} />
+            </Button>
+            <span className={`px-2 font-semibold min-w-[40px] text-center ${voteScore > 0 ? "text-green-600 dark:text-green-400" : voteScore < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
+              {voteScore}
+            </span>
+            <Button
+              onClick={() => handleVote(-1)}
+              variant="ghost"
+              size="sm"
+              disabled={!isSignedIn}
+              className={`rounded-none ${userVote === -1 ? "bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400" : ""}`}
+              title={isSignedIn ? "Downvote" : "Sign in to vote"}
+            >
+              <ArrowBigDown className={`w-5 h-5 ${userVote === -1 ? "fill-current" : ""}`} />
+            </Button>
+          </div>
+
+          {/* Comments count */}
+          <div className="flex items-center gap-1.5 text-muted-foreground px-2">
             <MessageCircle className="w-4 h-4" />
             <span>{tierlist._count.comments}</span>
+          </div>
+
+          {/* Save button */}
+          <Button
+            onClick={handleSave}
+            variant={isSaved ? "default" : "outline"}
+            size="sm"
+            disabled={!isSignedIn}
+            title={isSignedIn ? (isSaved ? "Unsave" : "Save") : "Sign in to save"}
+          >
+            <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
+          </Button>
+
+          {/* Share buttons */}
+          <div className="flex items-center gap-1 ml-2">
+            <Button
+              onClick={handleCopyLink}
+              variant="outline"
+              size="sm"
+              title="Copy link"
+            >
+              {copySuccess ? (
+                <span className="text-green-600 text-xs">Copied!</span>
+              ) : (
+                <Link2 className="w-4 h-4" />
+              )}
+            </Button>
+            <Button
+              onClick={() => handleShare("twitter")}
+              variant="outline"
+              size="sm"
+              title="Share on Twitter"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </Button>
+            <Button
+              onClick={() => handleShare("facebook")}
+              variant="outline"
+              size="sm"
+              title="Share on Facebook"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+            </Button>
+            <Button
+              onClick={() => handleShare("reddit")}
+              variant="outline"
+              size="sm"
+              title="Share on Reddit"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
+              </svg>
+            </Button>
           </div>
         </div>
       </div>

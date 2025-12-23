@@ -38,13 +38,14 @@ export async function GET(
           },
           orderBy: { createdAt: "desc" },
         },
-        likes: {
+        votes: {
           select: {
             userId: true,
+            value: true,
           },
         },
         _count: {
-          select: { likes: true, comments: true },
+          select: { votes: true, comments: true },
         },
       },
     });

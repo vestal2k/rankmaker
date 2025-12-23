@@ -18,9 +18,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tierlists TierList[]
-  comments  Comment[]
-  likes     Like[]
+  tierlists      TierList[]
+  comments       Comment[]
+  votes          Vote[]
+  savedTierLists SavedTierList[]
 }
 
 model TierList {
@@ -35,9 +36,10 @@ model TierList {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  tiers    Tier[]
-  comments Comment[]
-  likes    Like[]
+  tiers          Tier[]
+  comments       Comment[]
+  votes          Vote[]
+  savedBy        SavedTierList[]
 
   @@index([userId])
   @@index([anonymousId])
@@ -94,7 +96,22 @@ model Comment {
   @@index([userId])
 }
 
-model Like {
+model Vote {
+  id         String   @id @default(cuid())
+  value      Int      // 1 for upvote, -1 for downvote
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tierListId String
+  tierList   TierList @relation(fields: [tierListId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, tierListId])
+  @@index([tierListId])
+  @@index([userId])
+}
+
+model SavedTierList {
   id         String   @id @default(cuid())
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
