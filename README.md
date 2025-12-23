@@ -72,48 +72,6 @@
   <img src="https://skillicons.dev/icons?i=nextjs,react,typescript,tailwind,prisma,postgresql" />
 </p>
 
-- **Framework**: Next.js 14 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Clerk
-- **Drag & Drop**: dnd-kit
-- **Deployment**: Vercel
-
----
-
-## Getting Started
-
-```bash
-# Clone the repository
-git clone https://github.com/vestal2k/rankmaker.git
-cd rankmaker
-
-# Install dependencies
-pnpm install
-
-# Set up environment variables
-cp .env.example .env.local
-
-# Push database schema
-pnpm prisma db push
-
-# Run development server
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see the app.
-
----
-
-## Environment Variables
-
-```env
-DATABASE_URL=your_postgresql_url
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_key
-CLERK_SECRET_KEY=your_clerk_secret
-```
-
 ---
 
 ## Feedback
