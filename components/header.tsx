@@ -27,6 +27,12 @@ export function Header() {
           </Link>
           <nav className="hidden md:flex items-center gap-1">
             <Link
+              href="/categories"
+              className="px-3 py-2 text-sm font-medium rounded-lg hover:bg-orange-50 dark:hover:bg-orange-950/20 text-muted-foreground hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
+            >
+              Categories
+            </Link>
+            <Link
               href="/explore"
               className="px-3 py-2 text-sm font-medium rounded-lg hover:bg-orange-50 dark:hover:bg-orange-950/20 text-muted-foreground hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
             >
