@@ -220,10 +220,19 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
             muted
             loop
             playsInline
-            onMouseEnter={(e) => e.currentTarget.play()}
+            onMouseEnter={(e) => {
+              const video = e.currentTarget;
+              const playPromise = video.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(() => {
+                  // Silently ignore - element was removed or paused before play resolved
+                });
+              }
+            }}
             onMouseLeave={(e) => {
-              e.currentTarget.pause();
-              e.currentTarget.currentTime = 0;
+              const video = e.currentTarget;
+              video.pause();
+              video.currentTime = 0;
             }}
           />
           <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
@@ -296,24 +305,33 @@ function SortableItem({ item, onDelete, onClick }: { item: TierItem; onDelete?: 
       ref={setNodeRef}
       style={style}
       {...attributes}
-      {...listeners}
-      className="w-16 h-16 relative group cursor-move"
-      onClick={(e) => {
-        if (onClick && !isDragging) {
-          e.stopPropagation();
-          onClick(item);
-        }
-      }}
+      className="w-16 h-16 relative group"
     >
-      <MediaPreview
-        item={item}
-        className="border-2 border-transparent hover:border-primary"
-      />
+      {/* Drag handle - only this area triggers drag */}
+      <div
+        {...listeners}
+        className="w-full h-full cursor-move"
+        onClick={(e) => {
+          if (onClick && !isDragging) {
+            e.stopPropagation();
+            onClick(item);
+          }
+        }}
+      >
+        <MediaPreview
+          item={item}
+          className="border-2 border-transparent hover:border-primary"
+        />
+      </div>
       {onDelete && (
         <button
           onClick={(e) => {
             e.stopPropagation();
+            e.preventDefault();
             onDelete(item.id);
+          }}
+          onPointerDown={(e) => {
+            e.stopPropagation(); // Prevent drag from starting
           }}
           className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold z-10"
         >
@@ -643,7 +661,11 @@ function CreatePageContent() {
   };
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // 8px minimum movement before drag starts
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -1036,6 +1058,17 @@ function CreatePageContent() {
       return;
     }
 
+    // Find insertion index if dropping on a specific item
+    let insertIndex = -1;
+    if (destTierId === "unplaced") {
+      insertIndex = unplacedItems.findIndex((i) => i.id === overId);
+    } else {
+      const destTierObj = tiers.find((t) => t.id === destTierId);
+      if (destTierObj) {
+        insertIndex = destTierObj.items.findIndex((i) => i.id === overId);
+      }
+    }
+
     // Moving between different tiers or unplaced
     if (sourceTierId === "unplaced") {
       setUnplacedItems(unplacedItems.filter((i) => i.id !== activeId));
@@ -1054,11 +1087,27 @@ function CreatePageContent() {
     }
 
     if (destTierId === "unplaced") {
-      setUnplacedItems([...unplacedItems, item]);
+      if (insertIndex !== -1) {
+        // Insert at specific position
+        const newItems = [...unplacedItems.filter((i) => i.id !== activeId)];
+        newItems.splice(insertIndex, 0, item);
+        setUnplacedItems(newItems);
+      } else {
+        setUnplacedItems([...unplacedItems.filter((i) => i.id !== activeId), item]);
+      }
     } else {
       setTiers(
         tiers.map((tier) => {
           if (tier.id === destTierId) {
+            if (insertIndex !== -1) {
+              // Insert at specific position
+              const newItems = [...tier.items];
+              newItems.splice(insertIndex, 0, item);
+              return {
+                ...tier,
+                items: newItems,
+              };
+            }
             return {
               ...tier,
               items: [...tier.items, item],
@@ -1246,7 +1295,10 @@ function CreatePageContent() {
                 </Button>
               </div>
             ) : (
-              <label htmlFor="cover-image-upload">
+              <label
+              htmlFor="cover-image-upload"
+              onContextMenu={(e) => e.preventDefault()}
+            >
                 <div className="w-full max-w-md h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
                   {isUploadingCover ? (
                     <span className="text-muted-foreground">Uploading...</span>
@@ -1492,7 +1544,11 @@ function CreatePageContent() {
             </DroppablePoolZone>
           </SortableContext>
           <div className="mt-4 pt-4 border-t border-border flex gap-2">
-            <label htmlFor="pool-media-upload" className="flex-1">
+            <label
+              htmlFor="pool-media-upload"
+              className="flex-1"
+              onContextMenu={(e) => e.preventDefault()}
+            >
               <Button
                 type="button"
                 variant="outline"
@@ -1670,7 +1726,10 @@ function CreatePageContent() {
                       alt="Audio cover"
                       className="w-48 h-48 object-cover rounded-lg"
                     />
-                    <label className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer rounded-lg">
+                    <label
+                    className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer rounded-lg"
+                    onContextMenu={(e) => e.preventDefault()}
+                  >
                       <span className="text-white text-sm font-medium">Change cover</span>
                       <input
                         type="file"
@@ -1681,7 +1740,10 @@ function CreatePageContent() {
                     </label>
                   </div>
                 ) : (
-                  <label className="w-48 h-48 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors bg-gradient-to-br from-purple-500/20 to-purple-700/20">
+                  <label
+                    className="w-48 h-48 border-2 border-dashed border-border rounded-lg flex flex-col items-center justify-center cursor-pointer hover:border-primary transition-colors bg-gradient-to-br from-purple-500/20 to-purple-700/20"
+                    onContextMenu={(e) => e.preventDefault()}
+                  >
                     <ImageIcon className="w-12 h-12 text-muted-foreground mb-2" />
                     <span className="text-sm text-muted-foreground">Add cover image</span>
                     <input
