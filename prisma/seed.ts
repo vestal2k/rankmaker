@@ -27,7 +27,7 @@ const DEMO_TIERLISTS = [
   {
     title: "Best Video Games Ever",
     description: "A ranking of the greatest video games of all time",
-    coverImageUrl: "https://images.unsplash.com/photo-1493711662062-fa541f7f3d24?w=600",
+    coverImageUrl: "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=600",
     tiers: [
       {
         name: "S",
@@ -242,13 +242,23 @@ async function main() {
   console.log("Seeding demo tier lists...");
 
   for (const tierlistData of DEMO_TIERLISTS) {
+    // Check if tierlist already exists by title
+    const existing = await prisma.tierList.findFirst({
+      where: { title: tierlistData.title },
+    });
+
+    if (existing) {
+      console.log(`Skipped (already exists): ${tierlistData.title}`);
+      continue;
+    }
+
     const tierlist = await prisma.tierList.create({
       data: {
         title: tierlistData.title,
         description: tierlistData.description,
         coverImageUrl: tierlistData.coverImageUrl,
         isPublic: true,
-        anonymousId: `demo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        anonymousId: `demo-${tierlistData.title.toLowerCase().replace(/\s+/g, "-")}`,
       },
     });
 
