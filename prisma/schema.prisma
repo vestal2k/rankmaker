@@ -97,18 +97,21 @@ model Comment {
 }
 
 model Vote {
-  id         String   @id @default(cuid())
-  value      Int      // 1 for upvote, -1 for downvote
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tierListId String
-  tierList   TierList @relation(fields: [tierListId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String   @id @default(cuid())
+  value       Int      // 1 for upvote, -1 for downvote
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anonymousId String?  // For anonymous votes (stored in localStorage)
+  tierListId  String
+  tierList    TierList @relation(fields: [tierListId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@unique([userId, tierListId])
+  @@unique([anonymousId, tierListId])
   @@index([tierListId])
   @@index([userId])
+  @@index([anonymousId])
 }
 
 model SavedTierList {

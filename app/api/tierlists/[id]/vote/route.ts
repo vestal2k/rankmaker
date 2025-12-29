@@ -9,13 +9,8 @@ export async function POST(
 ) {
   try {
     const { userId: clerkId } = await auth();
-
-    if (!clerkId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
     const { id } = await params;
-    const { value } = await request.json();
+    const { value, anonymousId } = await request.json();
 
     // Validate vote value
     if (value !== 1 && value !== -1) {
@@ -23,15 +18,6 @@ export async function POST(
         { error: "Invalid vote value. Must be 1 (upvote) or -1 (downvote)" },
         { status: 400 }
       );
-    }
-
-    // Find user in database
-    const user = await db.user.findUnique({
-      where: { clerkId },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if tierlist exists
@@ -43,38 +29,93 @@ export async function POST(
       return NextResponse.json({ error: "Tier list not found" }, { status: 404 });
     }
 
-    // Check if already voted
-    const existingVote = await db.vote.findUnique({
-      where: {
-        userId_tierListId: {
+    // Handle authenticated user vote
+    if (clerkId) {
+      const user = await db.user.findUnique({
+        where: { clerkId },
+      });
+
+      if (!user) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      // Check if already voted
+      const existingVote = await db.vote.findUnique({
+        where: {
+          userId_tierListId: {
+            userId: user.id,
+            tierListId: id,
+          },
+        },
+      });
+
+      if (existingVote) {
+        if (existingVote.value === value) {
+          // Same vote, remove it (toggle off)
+          await db.vote.delete({
+            where: { id: existingVote.id },
+          });
+          return NextResponse.json({ message: "Vote removed", userVote: null });
+        } else {
+          // Different vote, update it
+          await db.vote.update({
+            where: { id: existingVote.id },
+            data: { value },
+          });
+          return NextResponse.json({ message: "Vote updated", userVote: value });
+        }
+      }
+
+      // Create new vote for authenticated user
+      await db.vote.create({
+        data: {
+          value,
           userId: user.id,
           tierListId: id,
         },
+      });
+
+      return NextResponse.json({ message: "Vote recorded", userVote: value });
+    }
+
+    // Handle anonymous user vote
+    if (!anonymousId) {
+      return NextResponse.json(
+        { error: "Anonymous ID required for non-authenticated users" },
+        { status: 400 }
+      );
+    }
+
+    // Check if anonymous user already voted
+    const existingAnonVote = await db.vote.findFirst({
+      where: {
+        anonymousId,
+        tierListId: id,
       },
     });
 
-    if (existingVote) {
-      if (existingVote.value === value) {
+    if (existingAnonVote) {
+      if (existingAnonVote.value === value) {
         // Same vote, remove it (toggle off)
         await db.vote.delete({
-          where: { id: existingVote.id },
+          where: { id: existingAnonVote.id },
         });
         return NextResponse.json({ message: "Vote removed", userVote: null });
       } else {
         // Different vote, update it
         await db.vote.update({
-          where: { id: existingVote.id },
+          where: { id: existingAnonVote.id },
           data: { value },
         });
         return NextResponse.json({ message: "Vote updated", userVote: value });
       }
     }
 
-    // Create new vote
+    // Create new vote for anonymous user
     await db.vote.create({
       data: {
         value,
-        userId: user.id,
+        anonymousId,
         tierListId: id,
       },
     });
@@ -97,6 +138,8 @@ export async function GET(
   try {
     const { userId: clerkId } = await auth();
     const { id } = await params;
+    const { searchParams } = new URL(request.url);
+    const anonymousId = searchParams.get("anonymousId");
 
     // Get vote score
     const votes = await db.vote.findMany({
@@ -110,6 +153,7 @@ export async function GET(
 
     let userVote = null;
 
+    // Check authenticated user vote
     if (clerkId) {
       const user = await db.user.findUnique({
         where: { clerkId },
@@ -126,6 +170,15 @@ export async function GET(
         });
         userVote = vote?.value ?? null;
       }
+    } else if (anonymousId) {
+      // Check anonymous user vote
+      const vote = await db.vote.findFirst({
+        where: {
+          anonymousId,
+          tierListId: id,
+        },
+      });
+      userVote = vote?.value ?? null;
     }
 
     return NextResponse.json({

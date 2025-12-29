@@ -29,6 +29,13 @@ export function Header() {
 
           <nav className="hidden md:flex items-center gap-1">
             <Link
+              href="/create"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-950/30 dark:hover:to-emerald-950/30 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 transition-all"
+            >
+              <PlusCircle className="w-4 h-4" />
+              Create
+            </Link>
+            <Link
               href="/categories"
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl hover:bg-gradient-to-r hover:from-orange-100 hover:to-pink-100 dark:hover:from-orange-950/30 dark:hover:to-pink-950/30 text-muted-foreground hover:text-orange-600 dark:hover:text-orange-400 transition-all"
             >
@@ -43,22 +50,13 @@ export function Header() {
               Explore
             </Link>
             {isSignedIn && (
-              <>
-                <Link
-                  href="/create"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl hover:bg-gradient-to-r hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-950/30 dark:hover:to-emerald-950/30 text-muted-foreground hover:text-green-600 dark:hover:text-green-400 transition-all"
-                >
-                  <PlusCircle className="w-4 h-4" />
-                  Create
-                </Link>
-                <Link
-                  href="/saved"
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl hover:bg-gradient-to-r hover:from-pink-100 hover:to-rose-100 dark:hover:from-pink-950/30 dark:hover:to-rose-950/30 text-muted-foreground hover:text-pink-600 dark:hover:text-pink-400 transition-all"
-                >
-                  <FolderHeart className="w-4 h-4" />
-                  Saved
-                </Link>
-              </>
+              <Link
+                href="/saved"
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl hover:bg-gradient-to-r hover:from-pink-100 hover:to-rose-100 dark:hover:from-pink-950/30 dark:hover:to-rose-950/30 text-muted-foreground hover:text-pink-600 dark:hover:text-pink-400 transition-all"
+              >
+                <FolderHeart className="w-4 h-4" />
+                Saved
+              </Link>
             )}
           </nav>
         </div>

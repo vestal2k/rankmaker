@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowBigUp, ArrowBigDown, MessageCircle, Share2, Edit, Volume2, Film, Youtube, Bookmark, Copy, Link2 } from "lucide-react";
+import { ArrowBigUp, ArrowBigDown, MessageCircle, Share2, Edit, Volume2, Film, Youtube, Bookmark, Copy, Link2, Layers } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getContrastColor } from "@/lib/utils";
 
 type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF" | "YOUTUBE" | "TWITTER" | "INSTAGRAM";
@@ -190,12 +191,24 @@ interface TierListDetail {
   };
 }
 
+// Get or generate anonymous ID for voting
+function getAnonymousId(): string {
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem("rankmaker_anonymous_id");
+  if (!id) {
+    id = `anon-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem("rankmaker_anonymous_id", id);
+  }
+  return id;
+}
+
 export default function TierListPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const resolvedParams = use(params);
+  const router = useRouter();
   const { user, isSignedIn } = useUser();
   const [tierlist, setTierlist] = useState<TierListDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -205,10 +218,16 @@ export default function TierListPage({
   const [newComment, setNewComment] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
+  const [anonymousId, setAnonymousId] = useState<string>("");
+
+  useEffect(() => {
+    setAnonymousId(getAnonymousId());
+  }, []);
 
   useEffect(() => {
     loadTierList();
-  }, [resolvedParams.id]);
+  }, [resolvedParams.id, anonymousId]);
 
   const loadTierList = async () => {
     try {
@@ -223,10 +242,20 @@ export default function TierListPage({
         setVoteScore(score);
       }
 
-      // Check user's vote
-      if (isSignedIn && data.votes) {
-        const userVoteData = data.votes.find((vote: any) => vote.userId === user?.id);
-        setUserVote(userVoteData?.value ?? null);
+      // Check user's vote (authenticated or anonymous)
+      if (anonymousId || isSignedIn) {
+        try {
+          const voteUrl = isSignedIn
+            ? `/api/tierlists/${resolvedParams.id}/vote`
+            : `/api/tierlists/${resolvedParams.id}/vote?anonymousId=${anonymousId}`;
+          const voteResponse = await fetch(voteUrl);
+          if (voteResponse.ok) {
+            const voteData = await voteResponse.json();
+            setUserVote(voteData.userVote);
+          }
+        } catch {
+          // Ignore errors for vote status
+        }
       }
 
       // Check if user has saved this tierlist
@@ -249,13 +278,14 @@ export default function TierListPage({
   };
 
   const handleVote = async (value: 1 | -1) => {
-    if (!isSignedIn) return;
+    // Allow both authenticated and anonymous users to vote
+    if (!isSignedIn && !anonymousId) return;
 
     try {
       const response = await fetch(`/api/tierlists/${resolvedParams.id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ value }),
+        body: JSON.stringify({ value, anonymousId: isSignedIn ? undefined : anonymousId }),
       });
 
       if (!response.ok) throw new Error("Failed to vote");
@@ -348,6 +378,23 @@ export default function TierListPage({
     }
   };
 
+  const handleUseTemplate = async () => {
+    setIsCreatingFromTemplate(true);
+    try {
+      const response = await fetch(`/api/tierlists/${resolvedParams.id}/use-template`, {
+        method: "POST",
+      });
+
+      if (!response.ok) throw new Error("Failed to use template");
+
+      const data = await response.json();
+      router.push(`/create?id=${data.id}`);
+    } catch (error) {
+      console.error("Error using template:", error);
+      setIsCreatingFromTemplate(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -386,14 +433,26 @@ export default function TierListPage({
       <div className="mb-6">
         <div className="flex items-start justify-between mb-4">
           <h1 className="text-3xl font-bold">{tierlist.title}</h1>
-          {isOwner && (
-            <Link href={`/create?id=${tierlist.id}`}>
-              <Button size="sm" variant="outline">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
+          <div className="flex items-center gap-2">
+            {!isOwner && (
+              <Button
+                onClick={handleUseTemplate}
+                disabled={isCreatingFromTemplate}
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
+              >
+                <Layers className="w-4 h-4 mr-2" />
+                {isCreatingFromTemplate ? "Creating..." : "Create My Version"}
               </Button>
-            </Link>
-          )}
+            )}
+            {isOwner && (
+              <Link href={`/create?id=${tierlist.id}`}>
+                <Button size="sm" variant="outline">
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Description */}
@@ -429,9 +488,8 @@ export default function TierListPage({
               onClick={() => handleVote(1)}
               variant="ghost"
               size="sm"
-              disabled={!isSignedIn}
               className={`rounded-none ${userVote === 1 ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400" : ""}`}
-              title={isSignedIn ? "Upvote" : "Sign in to vote"}
+              title="Upvote"
             >
               <ArrowBigUp className={`w-5 h-5 ${userVote === 1 ? "fill-current" : ""}`} />
             </Button>
@@ -442,9 +500,8 @@ export default function TierListPage({
               onClick={() => handleVote(-1)}
               variant="ghost"
               size="sm"
-              disabled={!isSignedIn}
               className={`rounded-none ${userVote === -1 ? "bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400" : ""}`}
-              title={isSignedIn ? "Downvote" : "Sign in to vote"}
+              title="Downvote"
             >
               <ArrowBigDown className={`w-5 h-5 ${userVote === -1 ? "fill-current" : ""}`} />
             </Button>
