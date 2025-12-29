@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
-import { Fraunces } from "next/font/google";
+import { Nunito, Nunito_Sans } from "next/font/google";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProviderWithTheme } from "@/components/clerk-provider-with-theme";
 import "./globals.css";
 
-// Fraunces - similar playful style to Recoleta
-const fraunces = Fraunces({
+const nunito = Nunito({
   subsets: ["latin"],
-  variable: "--font-fraunces",
+  variable: "--font-nunito",
+  display: "swap",
+});
+
+const nunitoSans = Nunito_Sans({
+  subsets: ["latin"],
+  variable: "--font-nunito-sans",
   display: "swap",
 });
 
@@ -71,7 +76,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${fraunces.variable} antialiased pt-16 font-sans`}>
+      <body className={`${nunito.variable} ${nunitoSans.variable} antialiased pt-16 font-sans`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"

@@ -53,7 +53,7 @@ export default function ExplorePage() {
               <Compass className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-zinc-900 ">
+              <h1 className="text-3xl sm:text-4xl font-black text-zinc-900">
                 Explore
               </h1>
               <p className="text-zinc-700 font-medium">Discover tier list templates to rank yourself</p>
@@ -80,7 +80,7 @@ export default function ExplorePage() {
               <div className="w-24 h-24 bg-[#E3F2FD] rounded-3xl flex items-center justify-center mx-auto mb-6 border-3 border-zinc-900">
                 <Search className="w-12 h-12 text-[#4DABF7]" />
               </div>
-              <h2 className="text-2xl font-bold mb-3 text-zinc-900 ">No tier lists yet!</h2>
+              <h2 className="text-2xl font-bold mb-3 text-zinc-900">No tier lists yet!</h2>
               <p className="text-zinc-700 mb-8 text-lg max-w-md mx-auto">
                 Be the first to create and share tier list templates with the community.
               </p>
@@ -117,7 +117,7 @@ export default function ExplorePage() {
                     </div>
                   )}
                   <div className="p-5">
-                    <h3 className="font-bold text-xl mb-2 truncate text-zinc-900 ">
+                    <h3 className="font-bold text-xl mb-2 truncate text-zinc-900">
                       {tierlist.title}
                     </h3>
                     {tierlist.description && (

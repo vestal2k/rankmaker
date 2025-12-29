@@ -96,7 +96,6 @@ export default function CategoriesPage() {
   return (
     <div className="min-h-screen py-12">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <div className="text-center mb-12">
           <div className="card-cartoon p-8 inline-block mb-6">
             <div className="flex items-center gap-3 justify-center mb-4">
@@ -113,7 +112,6 @@ export default function CategoriesPage() {
           </div>
         </div>
 
-        {/* Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-6xl mx-auto">
           {CATEGORIES.map((category) => {
             const Icon = category.icon;
@@ -142,7 +140,6 @@ export default function CategoriesPage() {
           })}
         </div>
 
-        {/* Fun CTA */}
         <div className="text-center mt-16">
           <div className="card-cartoon-sm inline-flex items-center gap-2 px-5 py-3">
             <Sparkles className="w-5 h-5 text-[#FFD43B]" />

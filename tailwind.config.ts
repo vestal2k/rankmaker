@@ -9,7 +9,8 @@ export default {
   theme: {
   	extend: {
   		fontFamily: {
-  			sans: ['var(--font-fraunces)', 'system-ui', 'sans-serif'],
+  			sans: ['var(--font-nunito-sans)', 'system-ui', 'sans-serif'],
+  			display: ['var(--font-nunito)', 'system-ui', 'sans-serif'],
   		},
   		colors: {
   			background: 'hsl(var(--background))',

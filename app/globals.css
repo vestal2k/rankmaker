@@ -345,9 +345,8 @@
     --chart-5: 340 80% 60%;
     --radius: 1.5rem;
 
-    /* Stripe colors - warm orange/yellow like rentguessr */
-    --stripe-color: 38 100% 72%;
-    --stripe-dark: 38 100% 65%;
+    --stripe-color: 35 100% 78%;
+    --stripe-dark: 35 100% 72%;
   }
 
 }
