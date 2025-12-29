@@ -3,7 +3,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { UserButton, SignInButton, useUser } from "@clerk/nextjs";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Compass, FolderHeart, PlusCircle, LayoutGrid, Menu, X } from "lucide-react";
 import { useState } from "react";
 
@@ -15,26 +14,26 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 p-4">
       <div className="container mx-auto">
         <div className="card-cartoon-sm !rounded-full px-4 py-2 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border-3 border-transparent transition-all duration-150 hover:border-[#1a1a1a] hover:bg-white hover:shadow-[4px_4px_0_#1a1a1a] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0_#1a1a1a]"
+          >
             <Image
               src="/logo.png"
               alt="Rankmaker"
               width={40}
               height={40}
-              className="transition-transform group-hover:scale-110 group-hover:rotate-6"
             />
-            <span className="text-xl font-black text-zinc-900 dark:text-white hidden sm:block">
+            <span className="text-xl font-black text-zinc-900 hidden sm:block">
               Rankmaker
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-2">
-            <Link href="/create">
-              <button className="btn-cartoon btn-green flex items-center gap-2 !py-2 !px-4 text-sm">
-                <PlusCircle className="w-4 h-4" />
-                Create
+            <Link href="/explore">
+              <button className="btn-cartoon btn-blue flex items-center gap-2 !py-2 !px-4 text-sm">
+                <Compass className="w-4 h-4" />
+                Explore
               </button>
             </Link>
             <Link href="/categories">
@@ -43,10 +42,10 @@ export function Header() {
                 Categories
               </button>
             </Link>
-            <Link href="/explore">
-              <button className="btn-cartoon btn-blue flex items-center gap-2 !py-2 !px-4 text-sm">
-                <Compass className="w-4 h-4" />
-                Explore
+            <Link href="/create">
+              <button className="btn-cartoon btn-green flex items-center gap-2 !py-2 !px-4 text-sm">
+                <PlusCircle className="w-4 h-4" />
+                Create
               </button>
             </Link>
             {isSignedIn && (
@@ -59,9 +58,7 @@ export function Header() {
             )}
           </nav>
 
-          {/* Right side */}
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             {isSignedIn ? (
               <UserButton afterSignOutUrl="/" />
             ) : (
@@ -72,7 +69,6 @@ export function Header() {
               </SignInButton>
             )}
 
-            {/* Mobile menu button */}
             <button
               className="md:hidden btn-cartoon btn-white !p-2"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -82,13 +78,12 @@ export function Header() {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {mobileMenuOpen && (
           <div className="md:hidden mt-2 card-cartoon p-4 flex flex-col gap-2">
-            <Link href="/create" onClick={() => setMobileMenuOpen(false)}>
-              <button className="btn-cartoon btn-green flex items-center gap-2 w-full justify-center">
-                <PlusCircle className="w-4 h-4" />
-                Create
+            <Link href="/explore" onClick={() => setMobileMenuOpen(false)}>
+              <button className="btn-cartoon btn-blue flex items-center gap-2 w-full justify-center">
+                <Compass className="w-4 h-4" />
+                Explore
               </button>
             </Link>
             <Link href="/categories" onClick={() => setMobileMenuOpen(false)}>
@@ -97,10 +92,10 @@ export function Header() {
                 Categories
               </button>
             </Link>
-            <Link href="/explore" onClick={() => setMobileMenuOpen(false)}>
-              <button className="btn-cartoon btn-blue flex items-center gap-2 w-full justify-center">
-                <Compass className="w-4 h-4" />
-                Explore
+            <Link href="/create" onClick={() => setMobileMenuOpen(false)}>
+              <button className="btn-cartoon btn-green flex items-center gap-2 w-full justify-center">
+                <PlusCircle className="w-4 h-4" />
+                Create
               </button>
             </Link>
             {isSignedIn && (
