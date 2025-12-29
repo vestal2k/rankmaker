@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowBigUp, MessageCircle, Bookmark, Loader2, Compass } from "lucide-react";
+import { ArrowBigUp, MessageCircle, Heart, Loader2, Compass, Sparkles, FolderHeart } from "lucide-react";
 
 interface SavedTierListPreview {
   id: string;
@@ -54,15 +54,28 @@ export default function SavedPage() {
 
   if (!isLoaded || isLoading) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
-            <Bookmark className="w-5 h-5 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold">Saved Tier Lists</h1>
+      <div className="min-h-screen py-12 relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full blur-3xl animate-blob" />
+          <div className="absolute inset-0 dots-pattern opacity-30" />
         </div>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+        <div className="container mx-auto px-4 relative">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-pink">
+              <FolderHeart className="w-7 h-7 text-white" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black">
+              <span className="bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                Saved
+              </span>
+            </h1>
+          </div>
+          <div className="flex items-center justify-center py-20">
+            <div className="relative">
+              <Loader2 className="w-12 h-12 text-pink-500 animate-spin" />
+              <div className="absolute inset-0 blur-xl bg-pink-400/30 animate-pulse" />
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -70,126 +83,173 @@ export default function SavedPage() {
 
   if (!isSignedIn) {
     return (
-      <div className="container mx-auto px-4 py-12">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
-            <Bookmark className="w-5 h-5 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold">Saved Tier Lists</h1>
+      <div className="min-h-screen py-12 relative overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full blur-3xl animate-blob" />
+          <div className="absolute inset-0 dots-pattern opacity-30" />
         </div>
-        <div className="text-center py-20">
-          <Bookmark className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-50" />
-          <p className="text-muted-foreground mb-6 text-lg">Sign in to see your saved tier lists</p>
-          <Link href="/sign-in">
-            <Button size="lg" className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600">
-              Sign In
-            </Button>
-          </Link>
+        <div className="container mx-auto px-4 relative">
+          <div className="flex items-center gap-4 mb-10">
+            <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-pink">
+              <FolderHeart className="w-7 h-7 text-white" />
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-black">
+              <span className="bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                Saved
+              </span>
+            </h1>
+          </div>
+          <div className="text-center py-20">
+            <div className="mb-8 relative inline-block">
+              <div className="w-32 h-32 bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-950/40 dark:to-rose-950/40 rounded-3xl flex items-center justify-center mx-auto">
+                <Heart className="w-16 h-16 text-pink-300 dark:text-pink-700" />
+              </div>
+              <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-500 animate-bounce-playful" />
+            </div>
+            <h2 className="text-2xl font-bold mb-3">Sign in to see your favorites</h2>
+            <p className="text-muted-foreground mb-8 text-lg">Save tier lists you love and access them anytime</p>
+            <Link href="/sign-in">
+              <Button size="lg" className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 rounded-2xl px-10 py-7 text-lg font-bold shadow-pink btn-playful">
+                <Sparkles className="w-5 h-5 mr-2" />
+                Sign In
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center">
-            <Bookmark className="w-5 h-5 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold">Saved Tier Lists</h1>
-        </div>
-        <Link href="/explore">
-          <Button variant="outline">
-            <Compass className="w-4 h-4 mr-2" />
-            Explore More
-          </Button>
-        </Link>
+    <div className="min-h-screen py-12 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full blur-3xl animate-blob" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-orange-400/20 to-pink-400/20 rounded-full blur-3xl animate-blob animate-delay-300" />
+        <div className="absolute inset-0 dots-pattern opacity-30" />
       </div>
 
-      {tierlists.length === 0 ? (
-        <div className="text-center py-20">
-          <div className="mb-6">
-            <Bookmark className="w-20 h-20 mx-auto text-muted-foreground opacity-30" />
+      <div className="container mx-auto px-4 relative">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 mb-10 flex-wrap">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-pink animate-bounce-playful">
+              <FolderHeart className="w-7 h-7 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black">
+                <span className="bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent">
+                  Saved
+                </span>
+              </h1>
+              <p className="text-muted-foreground font-medium">Your favorite tier lists</p>
+            </div>
           </div>
-          <p className="text-muted-foreground mb-6 text-lg">You haven&apos;t saved any tier lists yet</p>
           <Link href="/explore">
-            <Button size="lg" className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600">
-              <Compass className="w-5 h-5 mr-2" />
-              Discover Tier Lists
+            <Button variant="outline" className="rounded-xl border-2 border-pink-300 dark:border-pink-700 hover:bg-pink-50 dark:hover:bg-pink-950/30 font-bold">
+              <Compass className="w-4 h-4 mr-2" />
+              Explore More
             </Button>
           </Link>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tierlists.map((tierlist) => (
-            <Link key={tierlist.id} href={`/tierlist/${tierlist.id}`}>
-              <Card className="overflow-hidden group hover:shadow-xl hover:shadow-blue-500/10 transition-all hover:-translate-y-1 border-2 hover:border-blue-200 dark:hover:border-blue-900 cursor-pointer">
-                {tierlist.coverImageUrl ? (
-                  <div className="w-full h-36 overflow-hidden bg-muted">
-                    <img
-                      src={tierlist.coverImageUrl}
-                      alt={tierlist.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full h-36 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 flex items-center justify-center">
-                    <Image
-                      src="/logo.png"
-                      alt=""
-                      width={60}
-                      height={60}
-                      className="opacity-30"
-                    />
-                  </div>
-                )}
-                <div className="p-4">
-                  <h3 className="font-bold text-lg mb-1 truncate group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {tierlist.title}
-                  </h3>
-                  {tierlist.description && (
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {tierlist.description}
-                    </p>
-                  )}
-                  <div className="flex items-center gap-2 mb-3">
-                    {tierlist.user.imageUrl ? (
+
+        {tierlists.length === 0 ? (
+          <div className="text-center py-20">
+            <div className="mb-8 relative inline-block">
+              <div className="w-32 h-32 bg-gradient-to-br from-pink-100 to-rose-100 dark:from-pink-950/40 dark:to-rose-950/40 rounded-3xl flex items-center justify-center mx-auto">
+                <Heart className="w-16 h-16 text-pink-300 dark:text-pink-700" />
+              </div>
+              <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-yellow-500 animate-bounce-playful" />
+            </div>
+            <h2 className="text-2xl font-bold mb-3">No saved tier lists yet</h2>
+            <p className="text-muted-foreground mb-8 text-lg max-w-md mx-auto">
+              Explore and save tier lists you love to find them here later!
+            </p>
+            <Link href="/explore">
+              <Button size="lg" className="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 rounded-2xl px-10 py-7 text-lg font-bold shadow-pink btn-playful">
+                <Compass className="w-5 h-5 mr-2" />
+                Discover Tier Lists
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tierlists.map((tierlist, index) => (
+              <Link key={tierlist.id} href={`/tierlist/${tierlist.id}`}>
+                <Card
+                  className="overflow-hidden group card-playful cursor-pointer rounded-3xl border-0 shadow-soft hover:shadow-pink bg-card/90 backdrop-blur-sm"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  {tierlist.coverImageUrl ? (
+                    <div className="w-full h-40 overflow-hidden bg-muted">
                       <img
-                        src={tierlist.user.imageUrl}
-                        alt={tierlist.user.username}
-                        className="w-6 h-6 rounded-full ring-2 ring-blue-200 dark:ring-blue-900"
+                        src={tierlist.coverImageUrl}
+                        alt={tierlist.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                       />
-                    ) : (
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 flex items-center justify-center text-white text-xs font-bold">
-                        {tierlist.user.username.charAt(0).toUpperCase()}
-                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-full h-40 bg-gradient-to-br from-pink-200 via-rose-200 to-orange-200 dark:from-pink-950/40 dark:via-rose-950/40 dark:to-orange-950/40 flex items-center justify-center">
+                      <Image
+                        src="/logo.png"
+                        alt=""
+                        width={70}
+                        height={70}
+                        className="opacity-40 group-hover:opacity-60 group-hover:scale-110 transition-all duration-300"
+                      />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <h3 className="font-bold text-xl mb-2 truncate group-hover:text-pink-500 transition-colors">
+                      {tierlist.title}
+                    </h3>
+                    {tierlist.description && (
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {tierlist.description}
+                      </p>
                     )}
-                    <span className="text-sm text-muted-foreground">
-                      {tierlist.user.username}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <ArrowBigUp className={`w-4 h-4 ${tierlist.voteScore > 0 ? "text-green-500" : tierlist.voteScore < 0 ? "text-red-500" : ""}`} />
-                      <span className={tierlist.voteScore > 0 ? "text-green-600" : tierlist.voteScore < 0 ? "text-red-600" : ""}>
-                        {tierlist.voteScore}
+                    <div className="flex items-center gap-3 mb-4">
+                      {tierlist.user.imageUrl ? (
+                        <img
+                          src={tierlist.user.imageUrl}
+                          alt={tierlist.user.username}
+                          className="w-8 h-8 rounded-full ring-2 ring-pink-300 dark:ring-pink-700"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-400 flex items-center justify-center text-white text-sm font-bold">
+                          {tierlist.user.username.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {tierlist.user.username}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <MessageCircle className="w-4 h-4 text-blue-400" />
-                      <span>{tierlist._count.comments}</span>
+                    <div className="flex items-center gap-4 text-sm">
+                      <div className={`flex items-center gap-1 px-3 py-1 rounded-full ${
+                        tierlist.voteScore > 0
+                          ? "bg-green-100 dark:bg-green-950/40 text-green-600 dark:text-green-400"
+                          : tierlist.voteScore < 0
+                            ? "bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-red-400"
+                            : "bg-muted text-muted-foreground"
+                      } font-semibold`}>
+                        <ArrowBigUp className="w-4 h-4" />
+                        <span>{tierlist.voteScore}</span>
+                      </div>
+                      <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-semibold">
+                        <MessageCircle className="w-4 h-4" />
+                        <span>{tierlist._count.comments}</span>
+                      </div>
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        Saved {new Date(tierlist.savedAt).toLocaleDateString()}
+                      </span>
                     </div>
-                    <span className="ml-auto text-xs">
-                      Saved {new Date(tierlist.savedAt).toLocaleDateString()}
-                    </span>
                   </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
