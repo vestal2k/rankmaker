@@ -38,7 +38,11 @@
     "tailwindcss-animate": "^1.0.7",
     "ws": "^8.18.3"
   },
+  "prisma": {
+    "seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
   "devDependencies": {
+    "ts-node": "^10.9.2",
     "@types/node": "^20.19.27",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
