@@ -141,19 +141,19 @@ export default function ExplorePage() {
                       </p>
                     )}
                     <div className="flex items-center gap-3 mb-4">
-                      {tierlist.user.imageUrl ? (
+                      {tierlist.user?.imageUrl ? (
                         <img
                           src={tierlist.user.imageUrl}
-                          alt={tierlist.user.username}
+                          alt={tierlist.user?.username || "User"}
                           className="w-8 h-8 rounded-full ring-2 ring-purple-300 dark:ring-purple-700"
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white text-sm font-bold">
-                          {tierlist.user.username.charAt(0).toUpperCase()}
+                          {tierlist.user?.username?.charAt(0).toUpperCase() || "A"}
                         </div>
                       )}
                       <span className="text-sm font-medium text-muted-foreground">
-                        {tierlist.user.username}
+                        {tierlist.user?.username || "Anonymous"}
                       </span>
                     </div>
                     <div className="flex items-center gap-4 text-sm">

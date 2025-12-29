@@ -282,7 +282,7 @@ export default function Home() {
                         {tierlist.user?.imageUrl ? (
                           <img
                             src={tierlist.user.imageUrl}
-                            alt={tierlist.user.username}
+                            alt={tierlist.user?.username || "User"}
                             className="w-8 h-8 rounded-full ring-2 ring-orange-300 dark:ring-orange-700"
                           />
                         ) : (
