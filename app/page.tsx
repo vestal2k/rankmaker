@@ -70,14 +70,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-stripes">
-      {/* Hero Section */}
+    <div className="min-h-screen">
       <section className="pt-32 pb-20 px-4">
         <div className="container mx-auto">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Logo mascot */}
-            <div className="mb-8 flex justify-center">
-              <div className="relative">
+            <div className="mb-8 flex justify-center overflow-visible">
+              <div className="relative p-4">
                 <Image
                   src="/logo.png"
                   alt="Rankmaker Fox Mascot"
@@ -89,19 +87,17 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Title card */}
             <div className="card-cartoon p-8 mb-8 inline-block">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-4 text-zinc-900 dark:text-white">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-4 text-zinc-900">
                 Rank Everything.
                 <br />
                 <span className="text-[#FF6B6B]">Share Everywhere.</span>
               </h1>
-              <p className="text-lg sm:text-xl text-zinc-600 dark:text-zinc-300 max-w-2xl mx-auto font-medium">
-                Create awesome tier lists for games, movies, food, and literally anything else!
+              <p className="text-lg sm:text-xl text-zinc-600 max-w-2xl mx-auto font-medium">
+                Create tier list templates for games, movies, food, and literally anything else!
               </p>
             </div>
 
-            {/* CTA Buttons */}
             <div className="flex gap-4 justify-center flex-wrap mb-10">
               <Link href="/create">
                 <button className="btn-cartoon btn-coral flex items-center gap-2 text-lg !px-8 !py-4">
@@ -118,7 +114,6 @@ export default function Home() {
               </Link>
             </div>
 
-            {/* Fun badges */}
             <div className="flex justify-center gap-4 flex-wrap">
               <span className="badge-cartoon bg-[#E8F5E9] text-[#2E7D32]">
                 <Heart className="w-4 h-4" />
@@ -137,7 +132,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categories Section */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="card-cartoon p-8 max-w-5xl mx-auto">
@@ -145,7 +139,7 @@ export default function Home() {
               <div className="w-12 h-12 bg-[#FFD43B] rounded-2xl flex items-center justify-center border-3 border-zinc-900">
                 <Sparkles className="w-6 h-6 text-zinc-900" />
               </div>
-              <h2 className="text-3xl font-black text-zinc-900 dark:text-white">Pick a Category</h2>
+              <h2 className="text-3xl font-black text-zinc-900">Pick a Category</h2>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
@@ -168,7 +162,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Top Tier Lists */}
       <section className="py-16 px-4">
         <div className="container mx-auto">
           <div className="flex items-center justify-between gap-4 mb-8 flex-wrap max-w-6xl mx-auto">
@@ -176,7 +169,7 @@ export default function Home() {
               <div className="w-12 h-12 bg-[#FF6B6B] rounded-2xl flex items-center justify-center border-3 border-zinc-900">
                 <Trophy className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-3xl font-black text-zinc-900 dark:text-white">Top Tier Lists</h2>
+              <h2 className="text-3xl font-black text-zinc-900">Top Tierlists</h2>
             </div>
             <Link href="/explore">
               <button className="btn-cartoon btn-blue flex items-center gap-2">
@@ -210,9 +203,9 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {topTierlists.map((tierlist) => (
                 <Link key={tierlist.id} href={`/tierlist/${tierlist.id}`}>
-                  <div className="card-cartoon overflow-hidden cursor-pointer">
+                  <div className="card-cartoon overflow-hidden cursor-pointer h-full flex flex-col">
                     {tierlist.coverImageUrl ? (
-                      <div className="w-full h-40 overflow-hidden">
+                      <div className="w-full h-44 overflow-hidden flex-shrink-0">
                         <img
                           src={tierlist.coverImageUrl}
                           alt={tierlist.title}
@@ -220,7 +213,7 @@ export default function Home() {
                         />
                       </div>
                     ) : (
-                      <div className="w-full h-40 bg-gradient-to-br from-[#FFE0B2] to-[#FFCC80] flex items-center justify-center">
+                      <div className="w-full h-44 bg-gradient-to-br from-[#FFE0B2] to-[#FFCC80] flex items-center justify-center flex-shrink-0">
                         <Image
                           src="/logo.png"
                           alt=""
@@ -230,15 +223,13 @@ export default function Home() {
                         />
                       </div>
                     )}
-                    <div className="p-5">
-                      <h3 className="font-bold text-xl mb-2 truncate text-zinc-900 dark:text-white">
+                    <div className="p-5 flex flex-col flex-grow">
+                      <h3 className="font-bold text-xl mb-2 truncate text-zinc-900">
                         {tierlist.title}
                       </h3>
-                      {tierlist.description && (
-                        <p className="text-sm text-zinc-500 mb-4 line-clamp-2">
-                          {tierlist.description}
-                        </p>
-                      )}
+                      <p className="text-sm text-zinc-700 mb-4 line-clamp-2 min-h-[2.5rem]">
+                        {tierlist.description || "No description"}
+                      </p>
                       <div className="flex items-center gap-3 mb-4">
                         {tierlist.user?.imageUrl ? (
                           <img
@@ -251,17 +242,17 @@ export default function Home() {
                             {tierlist.user?.username?.charAt(0).toUpperCase() || "?"}
                           </div>
                         )}
-                        <span className="text-sm font-medium text-zinc-500">
+                        <span className="text-sm font-medium text-zinc-700">
                           {tierlist.user?.username || "Anonymous"}
                         </span>
                       </div>
-                      <div className="flex items-center gap-3 text-sm">
+                      <div className="flex items-center gap-3 text-sm mt-auto">
                         <span className={`badge-cartoon ${
                           tierlist.voteScore > 0
                             ? "bg-[#E8F5E9] text-[#2E7D32]"
                             : tierlist.voteScore < 0
                               ? "bg-[#FFEBEE] text-[#C62828]"
-                              : "bg-zinc-100 text-zinc-500"
+                              : "bg-zinc-100 text-zinc-700"
                         }`}>
                           <ArrowBigUp className="w-4 h-4" />
                           {tierlist.voteScore}
@@ -283,7 +274,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto">
           <div className="card-cartoon bg-[#FF6B6B] p-12 max-w-3xl mx-auto text-center">
@@ -304,7 +294,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="py-8 px-4">
         <div className="container mx-auto">
           <div className="card-cartoon-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -316,12 +305,20 @@ export default function Home() {
                 height={32}
                 className="group-hover:animate-wiggle"
               />
-              <span className="text-lg font-black text-zinc-900 dark:text-white">
+              <span className="text-lg font-black text-zinc-900">
                 Rankmaker
               </span>
             </div>
-            <p className="text-zinc-500 text-sm font-medium flex items-center gap-1">
-              Made with <Heart className="w-4 h-4 text-[#FF6B6B]" /> for ranking enthusiasts
+            <p className="text-zinc-700 text-sm font-medium">
+              Made by{" "}
+              <a
+                href="https://github.com/vestal2k"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[#FF6B6B] hover:underline font-bold"
+              >
+                vestal
+              </a>
             </p>
           </div>
         </div>
