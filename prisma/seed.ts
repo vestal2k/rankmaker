@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import * as dotenv from "dotenv";
+// Load env FIRST before any other imports
+const dotenv = require("dotenv");
 dotenv.config({ override: true });
 
-import { PrismaClient } from "@prisma/client";
-import { Pool } from "@neondatabase/serverless";
-import { PrismaNeon } from "@prisma/adapter-neon";
+// Use standard pg Pool for CLI seeding (not edge runtime)
+const { PrismaClient } = require("@prisma/client");
+const { Pool } = require("pg");
+const { PrismaPg } = require("@prisma/adapter-pg");
 
 const databaseUrl = process.env.DATABASE_URL;
 
@@ -13,11 +15,11 @@ if (!databaseUrl) {
   process.exit(1);
 }
 
+console.log("DATABASE_URL loaded:", databaseUrl.substring(0, 30) + "...");
 console.log("Connecting to database...");
 
 const pool = new Pool({ connectionString: databaseUrl });
-// @ts-expect-error - Type mismatch between Neon Pool and Prisma adapter
-const adapter = new PrismaNeon(pool);
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 // Sample tier list data
