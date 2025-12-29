@@ -367,7 +367,7 @@ export default function TierListPage({
     );
   }
 
-  const isOwner = isSignedIn && tierlist.user.id === user?.id;
+  const isOwner = isSignedIn && tierlist.user?.id === user?.id;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -402,15 +402,19 @@ export default function TierListPage({
         )}
 
         <div className="flex items-center gap-4 mb-4">
-          {tierlist.user.imageUrl && (
+          {tierlist.user?.imageUrl ? (
             <img
               src={tierlist.user.imageUrl}
-              alt={tierlist.user.username}
+              alt={tierlist.user?.username || "User"}
               className="w-10 h-10 rounded-full"
             />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-bold">
+              {tierlist.user?.username?.charAt(0).toUpperCase() || "A"}
+            </div>
           )}
           <div>
-            <p className="font-semibold">{tierlist.user.username}</p>
+            <p className="font-semibold">{tierlist.user?.username || "Anonymous"}</p>
             <p className="text-sm text-gray-500">
               {new Date(tierlist.createdAt).toLocaleDateString()}
             </p>
