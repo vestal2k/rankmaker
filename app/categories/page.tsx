@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
 import {
   Gamepad2,
   Film,
@@ -22,143 +21,122 @@ const CATEGORIES = [
   {
     name: "Games",
     icon: Gamepad2,
-    gradient: "from-purple-500 to-indigo-600",
-    shadow: "shadow-purple",
+    color: "btn-purple",
     description: "Video games, board games, card games",
   },
   {
     name: "Movies",
     icon: Film,
-    gradient: "from-red-500 to-pink-600",
-    shadow: "shadow-pink",
+    color: "btn-coral",
     description: "Films, documentaries, animations",
   },
   {
     name: "TV Shows",
     icon: Tv,
-    gradient: "from-blue-500 to-cyan-600",
-    shadow: "shadow-blue",
+    color: "btn-blue",
     description: "Series, anime, reality TV",
   },
   {
     name: "Music",
     icon: Music,
-    gradient: "from-green-500 to-emerald-600",
-    shadow: "shadow-green",
+    color: "btn-green",
     description: "Artists, albums, songs, genres",
   },
   {
     name: "Food",
     icon: Utensils,
-    gradient: "from-orange-500 to-amber-600",
-    shadow: "shadow-playful",
+    color: "btn-yellow",
     description: "Cuisine, restaurants, recipes",
   },
   {
     name: "Sports",
     icon: Trophy,
-    gradient: "from-yellow-500 to-orange-600",
-    shadow: "shadow-playful",
+    color: "btn-coral",
     description: "Teams, players, sports",
   },
   {
     name: "Anime",
     icon: Palette,
-    gradient: "from-pink-500 to-rose-600",
-    shadow: "shadow-pink",
+    color: "btn-purple",
     description: "Anime series, manga, characters",
   },
   {
     name: "Books",
     icon: BookOpen,
-    gradient: "from-amber-500 to-yellow-600",
-    shadow: "shadow-playful",
+    color: "btn-yellow",
     description: "Novels, authors, literary genres",
   },
   {
     name: "Cars",
     icon: Car,
-    gradient: "from-slate-500 to-gray-600",
-    shadow: "shadow-soft",
+    color: "btn-blue",
     description: "Vehicles, brands, motorsports",
   },
   {
     name: "Travel",
     icon: Globe,
-    gradient: "from-cyan-500 to-teal-600",
-    shadow: "shadow-blue",
+    color: "btn-green",
     description: "Countries, cities, destinations",
   },
   {
     name: "Lifestyle",
     icon: Heart,
-    gradient: "from-rose-500 to-pink-600",
-    shadow: "shadow-pink",
+    color: "btn-coral",
     description: "Fashion, hobbies, wellness",
   },
   {
     name: "Other",
     icon: LayoutGrid,
-    gradient: "from-gray-500 to-slate-600",
-    shadow: "shadow-soft",
+    color: "btn-white",
     description: "Everything else",
   },
 ];
 
 export default function CategoriesPage() {
   return (
-    <div className="min-h-screen py-12 relative overflow-hidden">
-      {/* Background decorations */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-blob" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-orange-400/20 to-yellow-400/20 rounded-full blur-3xl animate-blob animate-delay-300" />
-        <div className="absolute inset-0 dots-pattern opacity-30" />
-      </div>
-
-      <div className="container mx-auto px-4 relative">
+    <div className="min-h-screen py-12">
+      <div className="container mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-3 mb-6">
-            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-playful-lg animate-bounce-playful">
-              <LayoutGrid className="w-7 h-7 text-white" />
+          <div className="card-cartoon p-8 inline-block mb-6">
+            <div className="flex items-center gap-3 justify-center mb-4">
+              <div className="w-14 h-14 bg-[#FFD43B] rounded-2xl flex items-center justify-center border-3 border-zinc-900">
+                <LayoutGrid className="w-7 h-7 text-zinc-900" />
+              </div>
             </div>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-black mb-4">
-            <span className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl font-black text-zinc-900 mb-4">
               Browse Categories
-            </span>
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto font-medium">
-            Find tier lists for your favorite topics or discover new ones!
-          </p>
+            </h1>
+            <p className="text-lg text-zinc-600 max-w-xl mx-auto font-medium">
+              Find tier lists for your favorite topics or discover new ones!
+            </p>
+          </div>
         </div>
 
         {/* Categories Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 max-w-6xl mx-auto">
-          {CATEGORIES.map((category, index) => {
+          {CATEGORIES.map((category) => {
             const Icon = category.icon;
             return (
               <Link
                 key={category.name}
                 href={`/explore?category=${category.name.toLowerCase().replace(" ", "-")}`}
-                className="group"
-                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <Card className={`p-6 card-bouncy border-0 ${category.shadow} cursor-pointer bg-card/90 backdrop-blur-sm h-full`}>
+                <div className="card-cartoon p-6 h-full">
                   <div className="flex items-start gap-4">
-                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${category.gradient} flex items-center justify-center flex-shrink-0 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 shadow-lg`}>
-                      <Icon className="w-7 h-7 text-white" />
-                    </div>
+                    <button className={`btn-cartoon ${category.color} !p-3 flex-shrink-0`}>
+                      <Icon className="w-7 h-7" />
+                    </button>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-lg mb-1 group-hover:text-orange-500 transition-colors">
+                      <h3 className="font-bold text-lg mb-1 text-zinc-900">
                         {category.name}
                       </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-sm text-zinc-700">
                         {category.description}
                       </p>
                     </div>
                   </div>
-                </Card>
+                </div>
               </Link>
             );
           })}
@@ -166,9 +144,11 @@ export default function CategoriesPage() {
 
         {/* Fun CTA */}
         <div className="text-center mt-16">
-          <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-gradient-to-r from-orange-100 to-pink-100 dark:from-orange-950/40 dark:to-pink-950/40 text-orange-600 dark:text-orange-400 font-semibold">
-            <Sparkles className="w-5 h-5" />
-            <span>Can&apos;t find your category? Create a tier list in &quot;Other&quot;!</span>
+          <div className="card-cartoon-sm inline-flex items-center gap-2 px-5 py-3">
+            <Sparkles className="w-5 h-5 text-[#FFD43B]" />
+            <span className="font-bold text-zinc-900">
+              Can&apos;t find your category? Create a tier list in &quot;Other&quot;!
+            </span>
           </div>
         </div>
       </div>

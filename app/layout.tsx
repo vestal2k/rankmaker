@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
+import { Fraunces } from "next/font/google";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProviderWithTheme } from "@/components/clerk-provider-with-theme";
 import "./globals.css";
+
+// Fraunces - similar playful style to Recoleta
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(
@@ -63,16 +71,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased pt-16">
+      <body className={`${fraunces.variable} antialiased pt-16 font-sans`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="light"
+          forcedTheme="light"
           disableTransitionOnChange
         >
           <ClerkProviderWithTheme>
             <Header />
-            {children}
+            <main>
+              {children}
+            </main>
           </ClerkProviderWithTheme>
         </ThemeProvider>
       </body>
