@@ -9,6 +9,31 @@
 }
 
 /* ========================================
+   RENTGUESSR-INSPIRED PLAYFUL DESIGN
+   ======================================== */
+
+/* Striped background pattern */
+.bg-stripes {
+  background: repeating-linear-gradient(
+    -45deg,
+    hsl(var(--stripe-color)) 0px,
+    hsl(var(--stripe-color)) 20px,
+    hsl(var(--stripe-dark)) 20px,
+    hsl(var(--stripe-dark)) 40px
+  );
+}
+
+.bg-stripes-subtle {
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 20px,
+    hsl(var(--stripe-color) / 0.1) 20px,
+    hsl(var(--stripe-color) / 0.1) 40px
+  );
+}
+
+/* ========================================
    PLAYFUL ANIMATIONS
    ======================================== */
 
@@ -157,6 +182,108 @@
 }
 
 /* ========================================
+   CARTOON-STYLE CARDS (RENTGUESSR INSPIRED)
+   ======================================== */
+
+.card-cartoon {
+  @apply relative bg-white dark:bg-zinc-900 rounded-3xl;
+  border: 4px solid #1a1a1a;
+  box-shadow: 6px 6px 0 #1a1a1a;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-cartoon:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0 #1a1a1a;
+}
+
+.card-cartoon:active {
+  transform: translate(2px, 2px);
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+
+.card-cartoon-sm {
+  @apply relative bg-white dark:bg-zinc-900 rounded-2xl;
+  border: 3px solid #1a1a1a;
+  box-shadow: 4px 4px 0 #1a1a1a;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-cartoon-sm:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #1a1a1a;
+}
+
+/* ========================================
+   CARTOON BUTTONS
+   ======================================== */
+
+.btn-cartoon {
+  @apply relative font-bold rounded-full px-6 py-3;
+  border: 3px solid #1a1a1a;
+  box-shadow: 4px 4px 0 #1a1a1a;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-cartoon:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #1a1a1a;
+}
+
+.btn-cartoon:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #1a1a1a;
+}
+
+.btn-coral {
+  @apply bg-[#FF6B6B] text-white;
+}
+
+.btn-coral:hover {
+  @apply bg-[#ff5252];
+}
+
+.btn-blue {
+  @apply bg-[#4DABF7] text-white;
+}
+
+.btn-blue:hover {
+  @apply bg-[#339af0];
+}
+
+.btn-green {
+  @apply bg-[#51CF66] text-white;
+}
+
+.btn-green:hover {
+  @apply bg-[#40c057];
+}
+
+.btn-yellow {
+  @apply bg-[#FFD43B] text-zinc-900;
+}
+
+.btn-yellow:hover {
+  @apply bg-[#fcc419];
+}
+
+.btn-purple {
+  @apply bg-[#9775FA] text-white;
+}
+
+.btn-purple:hover {
+  @apply bg-[#845ef7];
+}
+
+.btn-white {
+  @apply bg-white text-zinc-900;
+}
+
+.btn-white:hover {
+  @apply bg-zinc-100;
+}
+
+/* ========================================
    PLAYFUL SHAPES
    ======================================== */
 
@@ -200,20 +327,12 @@
     0 0 0 1px rgba(0, 0, 0, 0.02);
 }
 
-.shadow-purple {
-  box-shadow: 0 10px 30px -5px rgba(168, 85, 247, 0.3);
+.shadow-hard {
+  box-shadow: 4px 4px 0 #1a1a1a;
 }
 
-.shadow-blue {
-  box-shadow: 0 10px 30px -5px rgba(59, 130, 246, 0.3);
-}
-
-.shadow-green {
-  box-shadow: 0 10px 30px -5px rgba(34, 197, 94, 0.3);
-}
-
-.shadow-pink {
-  box-shadow: 0 10px 30px -5px rgba(236, 72, 153, 0.3);
+.shadow-hard-lg {
+  box-shadow: 6px 6px 0 #1a1a1a;
 }
 
 /* ========================================
@@ -221,42 +340,14 @@
    ======================================== */
 
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid #1a1a1a;
 }
 
 .dark .glass {
-  background: rgba(30, 30, 30, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* ========================================
-   PLAYFUL GRADIENTS
-   ======================================== */
-
-.gradient-playful {
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd23f 100%);
-}
-
-.gradient-candy {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-}
-
-.gradient-sunset {
-  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-.gradient-ocean {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.gradient-mint {
-  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-}
-
-.gradient-fire {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background: rgba(30, 30, 30, 0.85);
+  border: 3px solid #1a1a1a;
 }
 
 /* ========================================
@@ -265,24 +356,24 @@
 
 @layer base {
   :root {
-    /* More vibrant, playful colors */
-    --background: 45 50% 98%;
-    --foreground: 24 15% 12%;
+    /* Playful warm colors */
+    --background: 45 100% 94%;
+    --foreground: 0 0% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 24 15% 12%;
+    --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 24 15% 12%;
+    --popover-foreground: 0 0% 10%;
     --primary: 24 100% 55%;
     --primary-foreground: 0 0% 100%;
     --secondary: 45 100% 75%;
-    --secondary-foreground: 24 15% 12%;
-    --muted: 45 30% 94%;
-    --muted-foreground: 24 10% 45%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 45 30% 90%;
+    --muted-foreground: 0 0% 40%;
     --accent: 160 60% 80%;
-    --accent-foreground: 24 15% 12%;
+    --accent-foreground: 0 0% 10%;
     --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 45 30% 88%;
+    --border: 0 0% 10%;
     --input: 45 30% 88%;
     --ring: 24 100% 55%;
     --chart-1: 24 100% 55%;
@@ -290,34 +381,42 @@
     --chart-3: 160 60% 50%;
     --chart-4: 200 80% 55%;
     --chart-5: 340 80% 60%;
-    --radius: 1rem;
+    --radius: 1.5rem;
+
+    /* Stripe colors - warm orange/yellow like rentguessr */
+    --stripe-color: 38 100% 72%;
+    --stripe-dark: 38 100% 65%;
   }
 
   .dark {
-    --background: 24 15% 6%;
+    --background: 220 15% 12%;
     --foreground: 45 30% 96%;
-    --card: 24 15% 9%;
+    --card: 220 15% 16%;
     --card-foreground: 45 30% 96%;
-    --popover: 24 15% 9%;
+    --popover: 220 15% 16%;
     --popover-foreground: 45 30% 96%;
     --primary: 24 100% 55%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 24 25% 18%;
+    --secondary: 220 15% 20%;
     --secondary-foreground: 45 30% 96%;
-    --muted: 24 15% 14%;
+    --muted: 220 15% 20%;
     --muted-foreground: 45 15% 55%;
     --accent: 24 35% 22%;
     --accent-foreground: 45 30% 96%;
     --destructive: 0 65% 45%;
     --destructive-foreground: 0 0% 98%;
-    --border: 24 15% 16%;
-    --input: 24 15% 16%;
+    --border: 0 0% 30%;
+    --input: 220 15% 20%;
     --ring: 24 100% 55%;
     --chart-1: 24 100% 55%;
     --chart-2: 45 100% 58%;
     --chart-3: 160 60% 50%;
     --chart-4: 200 80% 55%;
     --chart-5: 340 80% 60%;
+
+    /* Stripe colors dark - subtle but visible */
+    --stripe-color: 220 15% 15%;
+    --stripe-dark: 220 15% 12%;
   }
 }
 
@@ -331,7 +430,7 @@
 }
 
 /* ========================================
-   PLAYFUL BUTTON STYLES
+   LEGACY PLAYFUL STYLES (backward compat)
    ======================================== */
 
 .btn-playful {
@@ -339,20 +438,6 @@
   @apply hover:scale-105 active:scale-95;
   @apply shadow-lg hover:shadow-xl;
 }
-
-.btn-playful::before {
-  content: '';
-  @apply absolute inset-0 bg-white/20 translate-y-full;
-  transition: transform 0.3s ease;
-}
-
-.btn-playful:hover::before {
-  transform: translateY(0);
-}
-
-/* ========================================
-   PLAYFUL CARD STYLES
-   ======================================== */
 
 .card-playful {
   @apply transition-all duration-300 ease-out;
@@ -385,6 +470,34 @@
 }
 
 /* ========================================
+   PLAYFUL GRADIENTS
+   ======================================== */
+
+.gradient-playful {
+  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd23f 100%);
+}
+
+.gradient-candy {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+}
+
+.gradient-sunset {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.gradient-ocean {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-mint {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.gradient-fire {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+/* ========================================
    SMOOTH SCROLLING & TRANSITIONS
    ======================================== */
 
@@ -392,9 +505,49 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Only transition specific properties to avoid performance issues */
 .transition-playful {
   transition-property: transform, box-shadow, border-color, background-color, opacity;
   transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
   transition-duration: 300ms;
+}
+
+/* ========================================
+   INPUT CARTOON STYLE
+   ======================================== */
+
+.input-cartoon {
+  @apply bg-white dark:bg-zinc-900 rounded-2xl px-4 py-3 text-base;
+  border: 3px solid #1a1a1a;
+  box-shadow: 3px 3px 0 #1a1a1a;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.input-cartoon:focus {
+  outline: none;
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+
+/* ========================================
+   BADGE CARTOON STYLE
+   ======================================== */
+
+.badge-cartoon {
+  @apply inline-flex items-center gap-1 px-3 py-1 font-bold text-sm rounded-full;
+  border: 2px solid #1a1a1a;
+  box-shadow: 2px 2px 0 #1a1a1a;
+}
+
+/* ========================================
+   PROGRESS BAR CARTOON
+   ======================================== */
+
+.progress-cartoon {
+  @apply h-4 bg-white dark:bg-zinc-800 rounded-full overflow-hidden;
+  border: 3px solid #1a1a1a;
+}
+
+.progress-cartoon-fill {
+  @apply h-full bg-[#51CF66] rounded-full;
+  transition: width 0.3s ease;
 }

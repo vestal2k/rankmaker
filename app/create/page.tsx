@@ -1241,9 +1241,9 @@ function CreatePageContent() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-lg">Loading tier list...</p>
+      <div className="min-h-screen bg-stripes pt-28 pb-12 px-4 flex items-center justify-center">
+        <div className="card-cartoon p-8 text-center">
+          <p className="text-lg font-bold text-zinc-900">Loading tier list...</p>
         </div>
       </div>
     );
@@ -1257,13 +1257,16 @@ function CreatePageContent() {
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen bg-stripes pt-28 pb-12 px-4">
+        <div className="container mx-auto">
         <div className="mb-6">
           {/* Tierlist Settings Card */}
-          <Card className="p-4 mb-4">
-            <div className="flex items-center gap-2 mb-4">
-              <Settings className="w-5 h-5 text-muted-foreground" />
-              <h2 className="font-semibold">Tierlist Settings</h2>
+          <div className="card-cartoon p-6 mb-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-[#FFD43B] rounded-xl flex items-center justify-center border-2 border-zinc-900">
+                <Settings className="w-5 h-5 text-zinc-900" />
+              </div>
+              <h2 className="text-xl font-black text-zinc-900 dark:text-white">Tierlist Settings</h2>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -1352,28 +1355,28 @@ function CreatePageContent() {
                 )}
               </div>
             </div>
-          </Card>
+          </div>
 
           <div className="flex gap-2 flex-wrap">
-            <Button onClick={handleUndo} variant="outline" disabled={!canUndo} title="Undo (Ctrl+Z)">
+            <button onClick={handleUndo} disabled={!canUndo} title="Undo (Ctrl+Z)" className="btn-cartoon btn-white !py-2 !px-3 disabled:opacity-50">
               <Undo2 className="w-4 h-4" />
-            </Button>
+            </button>
 
-            <Button onClick={handleRedo} variant="outline" disabled={!canRedo} title="Redo (Ctrl+Y)">
+            <button onClick={handleRedo} disabled={!canRedo} title="Redo (Ctrl+Y)" className="btn-cartoon btn-white !py-2 !px-3 disabled:opacity-50">
               <Redo2 className="w-4 h-4" />
-            </Button>
+            </button>
 
-            <Button onClick={addTier} variant="outline">
-              <Plus className="w-4 h-4 mr-2" />
+            <button onClick={addTier} className="btn-cartoon btn-blue flex items-center gap-2">
+              <Plus className="w-4 h-4" />
               Add Tier
-            </Button>
+            </button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline">
-                  <LayoutTemplate className="w-4 h-4 mr-2" />
+                <button className="btn-cartoon btn-purple flex items-center gap-2">
+                  <LayoutTemplate className="w-4 h-4" />
                   Template
-                </Button>
+                </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-56">
                 {TIER_TEMPLATES.map((template, index) => (
@@ -1389,66 +1392,61 @@ function CreatePageContent() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button onClick={handleSave} disabled={isSaving} variant="default">
-              <Save className="w-4 h-4 mr-2" />
+            <button onClick={handleSave} disabled={isSaving} className="btn-cartoon btn-coral flex items-center gap-2 disabled:opacity-50">
+              <Save className="w-4 h-4" />
               {isSaving ? "Saving..." : tierlistId ? "Update" : "Save"}
-            </Button>
+            </button>
 
-            <Button onClick={handleExportPNG} variant="outline">
-              <Download className="w-4 h-4 mr-2" />
+            <button onClick={handleExportPNG} className="btn-cartoon btn-green flex items-center gap-2">
+              <Download className="w-4 h-4" />
               Export PNG
-            </Button>
+            </button>
           </div>
 
           {saveMessage && (
-            <div
-              className={`mt-4 p-3 rounded ${
-                saveMessage.type === "success"
-                  ? "bg-green-100 text-green-800 border border-green-300"
-                  : "bg-red-100 text-red-800 border border-red-300"
-              }`}
-            >
-              {saveMessage.text}
+            <div className={`mt-4 card-cartoon-sm p-4 ${
+              saveMessage.type === "success"
+                ? "bg-[#E8F5E9] text-[#2E7D32]"
+                : "bg-[#FFEBEE] text-[#C62828]"
+            }`}>
+              <p className="font-bold">{saveMessage.text}</p>
             </div>
           )}
 
           {showAuthPrompt && (
-            <div className="mt-4 p-4 rounded border border-blue-300 bg-blue-50 dark:bg-blue-950 dark:border-blue-800">
-              <p className="text-blue-900 dark:text-blue-100 mb-3">
+            <div className="mt-4 card-cartoon-sm p-4 bg-[#E3F2FD]">
+              <p className="text-[#1565C0] font-bold mb-3">
                 Sign in to publish your tier list publicly! You can still save it privately without an account.
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <SignInButton mode="modal">
-                  <Button size="sm">Sign In</Button>
+                  <button className="btn-cartoon btn-blue">Sign In</button>
                 </SignInButton>
-                <Button
-                  size="sm"
-                  variant="outline"
+                <button
+                  className="btn-cartoon btn-white"
                   onClick={() => {
                     setShowAuthPrompt(false);
                     setIsPublic(false);
-                    // Trigger save as private
                     setTimeout(() => handleSave(), 100);
                   }}
                 >
                   Save as Private
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
+                </button>
+                <button
+                  className="btn-cartoon btn-white"
                   onClick={() => setShowAuthPrompt(false)}
                 >
                   Cancel
-                </Button>
+                </button>
               </div>
             </div>
           )}
         </div>
 
         {/* Tier List */}
-        <div id="tier-list-container" className="space-y-2 mb-6">
+        <div id="tier-list-container" className="space-y-3 mb-6">
           {tiers.map((tier) => (
-            <Card key={tier.id} className="p-0 overflow-hidden">
+            <div key={tier.id} className="card-cartoon overflow-hidden !rounded-2xl">
               <div className="flex">
                 {/* Tier Label */}
                 <div
@@ -1537,13 +1535,13 @@ function CreatePageContent() {
                   </DropdownMenu>
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
 
         {/* Unplaced Items (Pool) */}
-        <Card className="p-4">
-          <h3 className="font-semibold mb-3">Pool</h3>
+        <div className="card-cartoon p-6">
+          <h3 className="text-xl font-black mb-4 text-zinc-900 dark:text-white">Pool</h3>
           <SortableContext
             items={unplacedItems.map((i) => i.id)}
             strategy={rectSortingStrategy}
@@ -1560,21 +1558,20 @@ function CreatePageContent() {
               ))}
             </DroppablePoolZone>
           </SortableContext>
-          <div className="mt-4 pt-4 border-t border-border flex gap-2">
+          <div className="mt-4 pt-4 border-t-2 border-zinc-200 dark:border-zinc-700 flex gap-3 flex-wrap">
             <label
               htmlFor="pool-media-upload"
-              className="flex-1"
+              className="flex-1 min-w-[140px]"
               onContextMenu={(e) => e.preventDefault()}
             >
-              <Button
+              <button
                 type="button"
-                variant="outline"
-                className="w-full"
+                className="btn-cartoon btn-blue w-full flex items-center justify-center gap-2"
                 onClick={() => document.getElementById("pool-media-upload")?.click()}
               >
-                <Plus className="w-4 h-4 mr-2" />
+                <Plus className="w-4 h-4" />
                 Add Media
-              </Button>
+              </button>
             </label>
             <input
               id="pool-media-upload"
@@ -1584,17 +1581,16 @@ function CreatePageContent() {
               className="hidden"
               onChange={handleMediaUpload}
             />
-            <Button
+            <button
               type="button"
-              variant="outline"
-              className="flex-1"
+              className="btn-cartoon btn-purple flex-1 min-w-[140px] flex items-center justify-center gap-2"
               onClick={() => setShowEmbedDialog(true)}
             >
-              <Link2 className="w-4 h-4 mr-2" />
+              <Link2 className="w-4 h-4" />
               Add Link
-            </Button>
+            </button>
           </div>
-        </Card>
+        </div>
 
         {/* Embed Dialog */}
         {showEmbedDialog && (
@@ -1607,26 +1603,26 @@ function CreatePageContent() {
             }}
           >
             <div
-              className="bg-background rounded-lg p-6 w-full max-w-md"
+              className="card-cartoon p-6 w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Add Link</h3>
+                <h3 className="text-xl font-black text-zinc-900 dark:text-white">Add Link</h3>
                 <button
                   onClick={() => {
                     setShowEmbedDialog(false);
                     setEmbedUrl("");
                     setEmbedError(null);
                   }}
-                  className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-secondary"
+                  className="btn-cartoon btn-white !p-2"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="text-sm text-zinc-500 mb-4 font-medium">
                 Paste a YouTube, Twitter/X, or Instagram URL
               </p>
-              <Input
+              <input
                 type="url"
                 placeholder="https://youtube.com/watch?v=..."
                 value={embedUrl}
@@ -1639,14 +1635,14 @@ function CreatePageContent() {
                     handleAddEmbed();
                   }
                 }}
-                className="mb-2"
+                className="input-cartoon w-full mb-3"
               />
               {embedError && (
-                <p className="text-sm text-destructive mb-4">{embedError}</p>
+                <p className="text-sm text-[#C62828] font-bold mb-4">{embedError}</p>
               )}
               <div className="flex gap-2 justify-end">
-                <Button
-                  variant="outline"
+                <button
+                  className="btn-cartoon btn-white"
                   onClick={() => {
                     setShowEmbedDialog(false);
                     setEmbedUrl("");
@@ -1654,8 +1650,8 @@ function CreatePageContent() {
                   }}
                 >
                   Cancel
-                </Button>
-                <Button onClick={handleAddEmbed}>Add</Button>
+                </button>
+                <button onClick={handleAddEmbed} className="btn-cartoon btn-blue">Add</button>
               </div>
             </div>
           </div>
@@ -1669,12 +1665,12 @@ function CreatePageContent() {
           onClick={() => setSelectedItem(null)}
         >
           <div
-            className="relative max-w-4xl max-h-[90vh] bg-background rounded-lg overflow-hidden"
+            className="relative max-w-4xl max-h-[90vh] card-cartoon overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setSelectedItem(null)}
-              className="absolute top-2 right-2 z-10 w-8 h-8 bg-background/80 hover:bg-background rounded-full flex items-center justify-center text-foreground"
+              className="absolute top-3 right-3 z-10 btn-cartoon btn-white !p-2"
             >
               <X className="w-5 h-5" />
             </button>
@@ -1796,6 +1792,7 @@ function CreatePageContent() {
           </div>
         ) : null}
       </DragOverlay>
+      </div>
     </DndContext>
   );
 }
@@ -1804,9 +1801,9 @@ export default function CreatePage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto px-4 py-8 flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-lg">Loading...</p>
+        <div className="min-h-screen bg-stripes pt-28 pb-12 px-4 flex items-center justify-center">
+          <div className="card-cartoon p-8 text-center">
+            <p className="text-lg font-bold text-zinc-900">Loading...</p>
           </div>
         </div>
       }

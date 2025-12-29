@@ -3,10 +3,8 @@
 import { useEffect, useState, use } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ArrowBigUp, ArrowBigDown, MessageCircle, Share2, Edit, Volume2, Film, Youtube, Bookmark, Copy, Link2, Layers } from "lucide-react";
+import Image from "next/image";
+import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Volume2, Film, Youtube, Bookmark, Link2, Layers, ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getContrastColor } from "@/lib/utils";
 
@@ -22,7 +20,6 @@ interface TierItem {
   order: number;
 }
 
-// Helper to get YouTube thumbnail from video ID
 function getYouTubeThumbnail(videoId: string): string {
   return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
 }
@@ -46,11 +43,7 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
       return (
         <div className={`relative ${className}`}>
           {item.coverImageUrl ? (
-            <img
-              src={item.coverImageUrl}
-              alt={item.label || "Tweet"}
-              className="w-full h-full object-cover rounded"
-            />
+            <img src={item.coverImageUrl} alt={item.label || "Tweet"} className="w-full h-full object-cover rounded" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center rounded">
               <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -69,11 +62,7 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
       return (
         <div className={`relative ${className}`}>
           {item.coverImageUrl ? (
-            <img
-              src={item.coverImageUrl}
-              alt={item.label || "Instagram post"}
-              className="w-full h-full object-cover rounded"
-            />
+            <img src={item.coverImageUrl} alt={item.label || "Instagram post"} className="w-full h-full object-cover rounded" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center rounded">
               <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
@@ -91,17 +80,9 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
     case "VIDEO":
       return (
         <div className={`relative ${className}`}>
-          <video
-            src={item.mediaUrl}
-            className="w-full h-full object-cover rounded"
-            muted
-            loop
-            playsInline
+          <video src={item.mediaUrl} className="w-full h-full object-cover rounded" muted loop playsInline
             onMouseEnter={(e) => e.currentTarget.play()}
-            onMouseLeave={(e) => {
-              e.currentTarget.pause();
-              e.currentTarget.currentTime = 0;
-            }}
+            onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
           />
           <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
             <Film className="w-3 h-3 text-white" />
@@ -112,11 +93,7 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
       return (
         <div className={`relative ${className}`}>
           {item.coverImageUrl ? (
-            <img
-              src={item.coverImageUrl}
-              alt={item.label || "Audio cover"}
-              className="w-full h-full object-cover rounded"
-            />
+            <img src={item.coverImageUrl} alt={item.label || "Audio cover"} className="w-full h-full object-cover rounded" />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center rounded">
               <Volume2 className="w-8 h-8 text-white" />
@@ -130,11 +107,7 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
     case "GIF":
       return (
         <div className={`relative ${className}`}>
-          <img
-            src={item.mediaUrl}
-            alt={item.label || ""}
-            className="w-full h-full object-cover rounded"
-          />
+          <img src={item.mediaUrl} alt={item.label || ""} className="w-full h-full object-cover rounded" />
           <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded px-1">
             <span className="text-[10px] font-bold text-white">GIF</span>
           </div>
@@ -142,13 +115,7 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
       );
     case "IMAGE":
     default:
-      return (
-        <img
-          src={item.mediaUrl}
-          alt={item.label || ""}
-          className={`w-full h-full object-cover rounded ${className}`}
-        />
-      );
+      return <img src={item.mediaUrl} alt={item.label || ""} className={`w-full h-full object-cover rounded ${className}`} />;
   }
 }
 
@@ -164,10 +131,7 @@ interface Comment {
   id: string;
   content: string;
   createdAt: string;
-  user: {
-    username: string;
-    imageUrl: string | null;
-  };
+  user: { username: string; imageUrl: string | null; };
 }
 
 interface TierListDetail {
@@ -177,21 +141,13 @@ interface TierListDetail {
   coverImageUrl: string | null;
   isPublic: boolean;
   createdAt: string;
-  user: {
-    id: string;
-    username: string;
-    imageUrl: string | null;
-  };
+  user: { id: string; username: string; imageUrl: string | null; };
   tiers: Tier[];
   comments: Comment[];
   votes: { userId: string; value: number }[];
-  _count: {
-    votes: number;
-    comments: number;
-  };
+  _count: { votes: number; comments: number; };
 }
 
-// Get or generate anonymous ID for voting
 function getAnonymousId(): string {
   if (typeof window === "undefined") return "";
   let id = localStorage.getItem("rankmaker_anonymous_id");
@@ -202,11 +158,7 @@ function getAnonymousId(): string {
   return id;
 }
 
-export default function TierListPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function TierListPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
   const { user, isSignedIn } = useUser();
@@ -221,13 +173,8 @@ export default function TierListPage({
   const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
   const [anonymousId, setAnonymousId] = useState<string>("");
 
-  useEffect(() => {
-    setAnonymousId(getAnonymousId());
-  }, []);
-
-  useEffect(() => {
-    loadTierList();
-  }, [resolvedParams.id, anonymousId]);
+  useEffect(() => { setAnonymousId(getAnonymousId()); }, []);
+  useEffect(() => { loadTierList(); }, [resolvedParams.id, anonymousId]);
 
   const loadTierList = async () => {
     try {
@@ -235,14 +182,10 @@ export default function TierListPage({
       if (!response.ok) throw new Error("Failed to load tier list");
       const data = await response.json();
       setTierlist(data);
-
-      // Calculate vote score
       if (data.votes) {
         const score = data.votes.reduce((sum: number, vote: { value: number }) => sum + vote.value, 0);
         setVoteScore(score);
       }
-
-      // Check user's vote (authenticated or anonymous)
       if (anonymousId || isSignedIn) {
         try {
           const voteUrl = isSignedIn
@@ -253,12 +196,8 @@ export default function TierListPage({
             const voteData = await voteResponse.json();
             setUserVote(voteData.userVote);
           }
-        } catch {
-          // Ignore errors for vote status
-        }
+        } catch { }
       }
-
-      // Check if user has saved this tierlist
       if (isSignedIn) {
         try {
           const savedResponse = await fetch(`/api/tierlists/${resolvedParams.id}/save`);
@@ -266,9 +205,7 @@ export default function TierListPage({
             const savedData = await savedResponse.json();
             setIsSaved(savedData.isSaved);
           }
-        } catch {
-          // Ignore errors for save status
-        }
+        } catch { }
       }
     } catch (error) {
       console.error("Error loading tier list:", error);
@@ -278,34 +215,22 @@ export default function TierListPage({
   };
 
   const handleVote = async (value: 1 | -1) => {
-    // Allow both authenticated and anonymous users to vote
     if (!isSignedIn && !anonymousId) return;
-
     try {
       const response = await fetch(`/api/tierlists/${resolvedParams.id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ value, anonymousId: isSignedIn ? undefined : anonymousId }),
       });
-
       if (!response.ok) throw new Error("Failed to vote");
-
       const data = await response.json();
-
-      // Update local state
       const oldVote = userVote;
       const newVote = data.userVote;
       setUserVote(newVote);
-
-      // Calculate score change
       let scoreChange = 0;
-      if (oldVote === null && newVote !== null) {
-        scoreChange = newVote;
-      } else if (oldVote !== null && newVote === null) {
-        scoreChange = -oldVote;
-      } else if (oldVote !== null && newVote !== null) {
-        scoreChange = newVote - oldVote;
-      }
+      if (oldVote === null && newVote !== null) scoreChange = newVote;
+      else if (oldVote !== null && newVote === null) scoreChange = -oldVote;
+      else if (oldVote !== null && newVote !== null) scoreChange = newVote - oldVote;
       setVoteScore((prev) => prev + scoreChange);
     } catch (error) {
       console.error("Error voting:", error);
@@ -314,12 +239,8 @@ export default function TierListPage({
 
   const handleSave = async () => {
     if (!isSignedIn) return;
-
     try {
-      const response = await fetch(`/api/tierlists/${resolvedParams.id}/save`, {
-        method: isSaved ? "DELETE" : "POST",
-      });
-
+      const response = await fetch(`/api/tierlists/${resolvedParams.id}/save`, { method: isSaved ? "DELETE" : "POST" });
       if (!response.ok) throw new Error("Failed to toggle save");
       setIsSaved(!isSaved);
     } catch (error) {
@@ -340,37 +261,27 @@ export default function TierListPage({
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href);
     const title = encodeURIComponent(tierlist?.title || "Check out this tier list!");
-
     const shareUrls: Record<string, string> = {
       twitter: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       reddit: `https://reddit.com/submit?url=${url}&title=${title}`,
     };
-
-    if (shareUrls[platform]) {
-      window.open(shareUrls[platform], "_blank", "width=600,height=400");
-    }
+    if (shareUrls[platform]) window.open(shareUrls[platform], "_blank", "width=600,height=400");
   };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSignedIn || !newComment.trim()) return;
-
     setIsSubmittingComment(true);
     try {
-      const response = await fetch(
-        `/api/tierlists/${resolvedParams.id}/comments`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ content: newComment }),
-        }
-      );
-
+      const response = await fetch(`/api/tierlists/${resolvedParams.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newComment }),
+      });
       if (!response.ok) throw new Error("Failed to post comment");
-
       setNewComment("");
-      await loadTierList(); // Reload to get new comment
+      await loadTierList();
     } catch (error) {
       console.error("Error posting comment:", error);
     } finally {
@@ -381,12 +292,8 @@ export default function TierListPage({
   const handleUseTemplate = async () => {
     setIsCreatingFromTemplate(true);
     try {
-      const response = await fetch(`/api/tierlists/${resolvedParams.id}/use-template`, {
-        method: "POST",
-      });
-
+      const response = await fetch(`/api/tierlists/${resolvedParams.id}/use-template`, { method: "POST" });
       if (!response.ok) throw new Error("Failed to use template");
-
       const data = await response.json();
       router.push(`/create?id=${data.id}`);
     } catch (error) {
@@ -397,19 +304,31 @@ export default function TierListPage({
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <p className="text-gray-600">Loading...</p>
+      <div className="min-h-screen bg-stripes pt-28 pb-12 px-4">
+        <div className="container mx-auto flex items-center justify-center py-20">
+          <div className="card-cartoon p-8 text-center">
+            <Loader2 className="w-12 h-12 text-[#4DABF7] animate-spin mx-auto" />
+            <p className="mt-4 font-bold text-zinc-600">Loading tier list...</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!tierlist) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-4">Tier List Not Found</h1>
-        <Link href="/explore" className="text-primary hover:underline">
-          Back to Explore
-        </Link>
+      <div className="min-h-screen bg-stripes pt-28 pb-12 px-4">
+        <div className="container mx-auto">
+          <div className="card-cartoon p-8 text-center max-w-md mx-auto">
+            <h1 className="text-2xl font-bold mb-4 text-zinc-900">Tier List Not Found</h1>
+            <Link href="/explore">
+              <button className="btn-cartoon btn-blue flex items-center gap-2 mx-auto">
+                <ArrowLeft className="w-4 h-4" />
+                Back to Explore
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
@@ -417,244 +336,161 @@ export default function TierListPage({
   const isOwner = isSignedIn && tierlist.user?.id === user?.id;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
-      {/* Cover Image */}
-      {tierlist.coverImageUrl && (
-        <div className="mb-6 w-full h-48 md:h-64 rounded-lg overflow-hidden">
-          <img
-            src={tierlist.coverImageUrl}
-            alt={tierlist.title}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-start justify-between mb-4">
-          <h1 className="text-3xl font-bold">{tierlist.title}</h1>
-          <div className="flex items-center gap-2">
-            {!isOwner && (
-              <Button
-                onClick={handleUseTemplate}
-                disabled={isCreatingFromTemplate}
-                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white"
-              >
-                <Layers className="w-4 h-4 mr-2" />
-                {isCreatingFromTemplate ? "Creating..." : "Create My Version"}
-              </Button>
-            )}
-            {isOwner && (
-              <Link href={`/create?id=${tierlist.id}`}>
-                <Button size="sm" variant="outline">
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-              </Link>
-            )}
+    <div className="min-h-screen bg-stripes pt-28 pb-12 px-4">
+      <div className="container mx-auto max-w-5xl">
+        {/* Cover Image */}
+        {tierlist.coverImageUrl && (
+          <div className="mb-6 card-cartoon overflow-hidden">
+            <img src={tierlist.coverImageUrl} alt={tierlist.title} className="w-full h-48 md:h-64 object-cover" />
           </div>
-        </div>
-
-        {/* Description */}
-        {tierlist.description && (
-          <p className="text-muted-foreground mb-4">{tierlist.description}</p>
         )}
 
-        <div className="flex items-center gap-4 mb-4">
-          {tierlist.user?.imageUrl ? (
-            <img
-              src={tierlist.user.imageUrl}
-              alt={tierlist.user?.username || "User"}
-              className="w-10 h-10 rounded-full"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-blue-400 flex items-center justify-center text-white font-bold">
-              {tierlist.user?.username?.charAt(0).toUpperCase() || "A"}
-            </div>
-          )}
-          <div>
-            <p className="font-semibold">{tierlist.user?.username || "Anonymous"}</p>
-            <p className="text-sm text-gray-500">
-              {new Date(tierlist.createdAt).toLocaleDateString()}
-            </p>
-          </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Vote buttons */}
-          <div className="flex items-center border rounded-lg overflow-hidden">
-            <Button
-              onClick={() => handleVote(1)}
-              variant="ghost"
-              size="sm"
-              className={`rounded-none ${userVote === 1 ? "bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-400" : ""}`}
-              title="Upvote"
-            >
-              <ArrowBigUp className={`w-5 h-5 ${userVote === 1 ? "fill-current" : ""}`} />
-            </Button>
-            <span className={`px-2 font-semibold min-w-[40px] text-center ${voteScore > 0 ? "text-green-600 dark:text-green-400" : voteScore < 0 ? "text-red-600 dark:text-red-400" : ""}`}>
-              {voteScore}
-            </span>
-            <Button
-              onClick={() => handleVote(-1)}
-              variant="ghost"
-              size="sm"
-              className={`rounded-none ${userVote === -1 ? "bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400" : ""}`}
-              title="Downvote"
-            >
-              <ArrowBigDown className={`w-5 h-5 ${userVote === -1 ? "fill-current" : ""}`} />
-            </Button>
-          </div>
-
-          {/* Comments count */}
-          <div className="flex items-center gap-1.5 text-muted-foreground px-2">
-            <MessageCircle className="w-4 h-4" />
-            <span>{tierlist._count.comments}</span>
-          </div>
-
-          {/* Save button */}
-          <Button
-            onClick={handleSave}
-            variant={isSaved ? "default" : "outline"}
-            size="sm"
-            disabled={!isSignedIn}
-            title={isSignedIn ? (isSaved ? "Unsave" : "Save") : "Sign in to save"}
-          >
-            <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
-          </Button>
-
-          {/* Share buttons */}
-          <div className="flex items-center gap-1 ml-2">
-            <Button
-              onClick={handleCopyLink}
-              variant="outline"
-              size="sm"
-              title="Copy link"
-            >
-              {copySuccess ? (
-                <span className="text-green-600 text-xs">Copied!</span>
-              ) : (
-                <Link2 className="w-4 h-4" />
+        {/* Header Card */}
+        <div className="card-cartoon p-6 mb-6">
+          <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
+            <h1 className="text-3xl font-black text-zinc-900 dark:text-white">{tierlist.title}</h1>
+            <div className="flex items-center gap-2">
+              {!isOwner && (
+                <button onClick={handleUseTemplate} disabled={isCreatingFromTemplate} className="btn-cartoon btn-green flex items-center gap-2">
+                  <Layers className="w-4 h-4" />
+                  {isCreatingFromTemplate ? "Creating..." : "Create My Version"}
+                </button>
               )}
-            </Button>
-            <Button
-              onClick={() => handleShare("twitter")}
-              variant="outline"
-              size="sm"
-              title="Share on Twitter"
-            >
+              {isOwner && (
+                <Link href={`/create?id=${tierlist.id}`}>
+                  <button className="btn-cartoon btn-yellow flex items-center gap-2">
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
+                </Link>
+              )}
+            </div>
+          </div>
+
+          {tierlist.description && <p className="text-zinc-500 mb-4">{tierlist.description}</p>}
+
+          {/* Author */}
+          <div className="flex items-center gap-4 mb-4">
+            {tierlist.user?.imageUrl ? (
+              <img src={tierlist.user.imageUrl} alt={tierlist.user?.username || "User"} className="w-10 h-10 rounded-full border-2 border-zinc-900" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-[#4DABF7] flex items-center justify-center text-white font-bold border-2 border-zinc-900">
+                {tierlist.user?.username?.charAt(0).toUpperCase() || "A"}
+              </div>
+            )}
+            <div>
+              <p className="font-bold text-zinc-900 dark:text-white">{tierlist.user?.username || "Anonymous"}</p>
+              <p className="text-sm text-zinc-500">{new Date(tierlist.createdAt).toLocaleDateString()}</p>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Vote buttons */}
+            <div className="card-cartoon-sm flex items-center !rounded-full overflow-hidden !p-0">
+              <button onClick={() => handleVote(1)} className={`px-3 py-2 transition-colors ${userVote === 1 ? "bg-[#E8F5E9] text-[#2E7D32]" : "hover:bg-zinc-100"}`}>
+                <ArrowBigUp className={`w-5 h-5 ${userVote === 1 ? "fill-current" : ""}`} />
+              </button>
+              <span className={`px-2 font-bold min-w-[40px] text-center ${voteScore > 0 ? "text-[#2E7D32]" : voteScore < 0 ? "text-[#C62828]" : ""}`}>
+                {voteScore}
+              </span>
+              <button onClick={() => handleVote(-1)} className={`px-3 py-2 transition-colors ${userVote === -1 ? "bg-[#FFEBEE] text-[#C62828]" : "hover:bg-zinc-100"}`}>
+                <ArrowBigDown className={`w-5 h-5 ${userVote === -1 ? "fill-current" : ""}`} />
+              </button>
+            </div>
+
+            <span className="badge-cartoon bg-[#E3F2FD] text-[#1565C0]">
+              <MessageCircle className="w-4 h-4" />
+              {tierlist._count.comments}
+            </span>
+
+            <button onClick={handleSave} disabled={!isSignedIn} className={`btn-cartoon ${isSaved ? "btn-purple" : "btn-white"} !py-2 !px-3`} title={isSignedIn ? (isSaved ? "Unsave" : "Save") : "Sign in to save"}>
+              <Bookmark className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`} />
+            </button>
+
+            <button onClick={handleCopyLink} className="btn-cartoon btn-white !py-2 !px-3" title="Copy link">
+              {copySuccess ? <span className="text-[#2E7D32] text-xs font-bold">Copied!</span> : <Link2 className="w-4 h-4" />}
+            </button>
+
+            <button onClick={() => handleShare("twitter")} className="btn-cartoon btn-white !py-2 !px-3" title="Share on Twitter">
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
               </svg>
-            </Button>
-            <Button
-              onClick={() => handleShare("facebook")}
-              variant="outline"
-              size="sm"
-              title="Share on Facebook"
-            >
-              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg>
-            </Button>
-            <Button
-              onClick={() => handleShare("reddit")}
-              variant="outline"
-              size="sm"
-              title="Share on Reddit"
-            >
+            </button>
+
+            <button onClick={() => handleShare("reddit")} className="btn-cartoon btn-white !py-2 !px-3" title="Share on Reddit">
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z" />
               </svg>
-            </Button>
+            </button>
           </div>
         </div>
-      </div>
 
-      {/* Tier List Display */}
-      <div className="space-y-2 mb-8">
-        {tierlist.tiers
-          .sort((a, b) => a.order - b.order)
-          .map((tier) => (
-            <Card key={tier.id} className="p-0 overflow-hidden">
+        {/* Tier List Display */}
+        <div className="space-y-3 mb-8">
+          {tierlist.tiers.sort((a, b) => a.order - b.order).map((tier) => (
+            <div key={tier.id} className="card-cartoon overflow-hidden !rounded-2xl">
               <div className="flex">
-                <div
-                  className="w-24 flex items-center justify-center font-bold text-lg shrink-0 p-2 break-words text-center"
-                  style={{
-                    backgroundColor: tier.color,
-                    color: getContrastColor(tier.color),
-                    wordBreak: 'break-word',
-                    overflowWrap: 'anywhere'
-                  }}
-                >
+                <div className="w-24 flex items-center justify-center font-black text-lg shrink-0 p-3 break-words text-center" style={{ backgroundColor: tier.color, color: getContrastColor(tier.color) }}>
                   {tier.name}
                 </div>
-                <div className="flex-1 min-h-[100px] p-2 flex flex-wrap gap-2 items-start bg-secondary/20">
-                  {tier.items
-                    .sort((a, b) => a.order - b.order)
-                    .map((item) => (
-                      <div key={item.id} className="w-16 h-16">
-                        <MediaPreview item={item} className="border-2" />
-                      </div>
-                    ))}
+                <div className="flex-1 min-h-[80px] p-3 flex flex-wrap gap-2 items-start bg-white dark:bg-zinc-800">
+                  {tier.items.sort((a, b) => a.order - b.order).map((item) => (
+                    <div key={item.id} className="w-16 h-16">
+                      <MediaPreview item={item} className="border-2 border-zinc-900" />
+                    </div>
+                  ))}
                 </div>
               </div>
-            </Card>
+            </div>
           ))}
-      </div>
+        </div>
 
-      {/* Comments Section */}
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">
-          Comments ({tierlist.comments.length})
-        </h2>
+        {/* Comments Section */}
+        <div className="card-cartoon p-6">
+          <h2 className="text-2xl font-black mb-4 text-zinc-900 dark:text-white">
+            Comments ({tierlist.comments.length})
+          </h2>
 
-        {isSignedIn ? (
-          <form onSubmit={handleSubmitComment} className="mb-6">
-            <Textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment..."
-              className="mb-2"
-              rows={3}
-            />
-            <Button
-              type="submit"
-              disabled={isSubmittingComment || !newComment.trim()}
-            >
-              Post Comment
-            </Button>
-          </form>
-        ) : (
-          <p className="mb-6 text-gray-600">Sign in to leave a comment.</p>
-        )}
+          {isSignedIn ? (
+            <form onSubmit={handleSubmitComment} className="mb-6">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="input-cartoon w-full mb-3"
+                rows={3}
+              />
+              <button type="submit" disabled={isSubmittingComment || !newComment.trim()} className="btn-cartoon btn-blue">
+                {isSubmittingComment ? "Posting..." : "Post Comment"}
+              </button>
+            </form>
+          ) : (
+            <p className="mb-6 text-zinc-500 font-medium">Sign in to leave a comment.</p>
+          )}
 
-        <div className="space-y-4">
-          {tierlist.comments.map((comment) => (
-            <Card key={comment.id} className="p-4">
-              <div className="flex items-start gap-3">
-                {comment.user.imageUrl && (
-                  <img
-                    src={comment.user.imageUrl}
-                    alt={comment.user.username}
-                    className="w-8 h-8 rounded-full"
-                  />
-                )}
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold">
-                      {comment.user.username}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
+          <div className="space-y-4">
+            {tierlist.comments.map((comment) => (
+              <div key={comment.id} className="card-cartoon-sm p-4">
+                <div className="flex items-start gap-3">
+                  {comment.user.imageUrl ? (
+                    <img src={comment.user.imageUrl} alt={comment.user.username} className="w-8 h-8 rounded-full border-2 border-zinc-900" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-[#4DABF7] flex items-center justify-center text-white font-bold border-2 border-zinc-900 text-sm">
+                      {comment.user.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-bold text-zinc-900 dark:text-white">{comment.user.username}</span>
+                      <span className="text-sm text-zinc-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-zinc-600 dark:text-zinc-300">{comment.content}</p>
                   </div>
-                  <p className="text-gray-700">{comment.content}</p>
                 </div>
               </div>
-            </Card>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
