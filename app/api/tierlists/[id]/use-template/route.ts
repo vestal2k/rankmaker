@@ -3,7 +3,6 @@ import { auth } from "@clerk/nextjs/server";
 import { db } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
 
-// POST /api/tierlists/[id]/use-template - Create a new tierlist from a template
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -12,7 +11,6 @@ export async function POST(
     const { userId } = await auth();
     const { id } = await params;
 
-    // Get the original tierlist
     const original = await db.tierList.findUnique({
       where: { id },
       include: {
@@ -39,19 +37,17 @@ export async function POST(
       );
     }
 
-    // Create a new tierlist copy
     const newTierlist = await db.tierList.create({
       data: {
         title: original.title,
         description: original.description,
         coverImageUrl: original.coverImageUrl,
-        isPublic: false, // Start as private
+        isPublic: false,
         userId: userId || null,
         anonymousId: userId ? null : `anon-${uuidv4()}`,
       },
     });
 
-    // Collect all items from all tiers to put them in uncategorized
     const allItems: Array<{
       mediaUrl: string;
       mediaType: string;
@@ -72,7 +68,6 @@ export async function POST(
       }
     }
 
-    // Create the same tiers structure (empty)
     for (const tier of original.tiers) {
       await db.tier.create({
         data: {
@@ -84,17 +79,15 @@ export async function POST(
       });
     }
 
-    // Create an "Uncategorized" tier at the end with all items
-    const uncategorizedTier = await db.tier.create({
+    const poolTier = await db.tier.create({
       data: {
-        name: "Uncategorized",
+        name: "__POOL__",
         color: "#808080",
-        order: original.tiers.length,
+        order: 9999,
         tierListId: newTierlist.id,
       },
     });
 
-    // Add all items to uncategorized tier
     for (let i = 0; i < allItems.length; i++) {
       const item = allItems[i];
       await db.tierItem.create({
@@ -105,7 +98,7 @@ export async function POST(
           embedId: item.embedId,
           label: item.label,
           order: i,
-          tierId: uncategorizedTier.id,
+          tierId: poolTier.id,
         },
       });
     }

@@ -632,23 +632,33 @@ function CreatePageContent() {
       setCoverImageUrl(data.coverImageUrl || null);
       setIsPublic(data.isPublic);
 
-      // Convert database format to component format
-      const loadedTiers: Tier[] = data.tiers.map((tier: any) => ({
-        id: tier.id,
-        name: tier.name,
-        color: tier.color,
-        items: tier.items.map((item: any) => ({
+      const poolItems: TierItem[] = [];
+      const loadedTiers: Tier[] = [];
+
+      for (const tier of data.tiers) {
+        const items = tier.items.map((item: any) => ({
           id: item.id,
           mediaUrl: item.mediaUrl,
           mediaType: item.mediaType || "IMAGE",
           coverImageUrl: item.coverImageUrl,
           embedId: item.embedId,
           label: item.label,
-        })),
-      }));
+        }));
+
+        if (tier.name === "__POOL__") {
+          poolItems.push(...items);
+        } else {
+          loadedTiers.push({
+            id: tier.id,
+            name: tier.name,
+            color: tier.color,
+            items,
+          });
+        }
+      }
 
       setTiers(loadedTiers);
-      setUnplacedItems([]);
+      setUnplacedItems(poolItems);
     } catch (error) {
       console.error("Error loading tier list:", error);
       setSaveMessage({
@@ -1135,22 +1145,38 @@ function CreatePageContent() {
     setSaveMessage(null);
 
     try {
-      const payload: Record<string, any> = {
-        title,
-        description: description || null,
-        coverImageUrl: coverImageUrl || null,
-        isPublic: isSignedIn ? isPublic : false, // Force private for anonymous users
-        tiers: tiers.map((tier) => ({
-          name: tier.name,
-          color: tier.color,
-          items: tier.items.map((item) => ({
+      const allTiers = [...tiers.map((tier) => ({
+        name: tier.name,
+        color: tier.color,
+        items: tier.items.map((item) => ({
+          mediaUrl: item.mediaUrl,
+          mediaType: item.mediaType,
+          coverImageUrl: item.coverImageUrl,
+          embedId: item.embedId,
+          label: item.label,
+        })),
+      }))];
+
+      if (unplacedItems.length > 0) {
+        allTiers.push({
+          name: "__POOL__",
+          color: "#808080",
+          items: unplacedItems.map((item) => ({
             mediaUrl: item.mediaUrl,
             mediaType: item.mediaType,
             coverImageUrl: item.coverImageUrl,
             embedId: item.embedId,
             label: item.label,
           })),
-        })),
+        });
+      }
+
+      const payload: Record<string, any> = {
+        title,
+        description: description || null,
+        coverImageUrl: coverImageUrl || null,
+        isPublic: isSignedIn ? isPublic : false,
+        tiers: allTiers,
       };
 
       // Add anonymousId for non-authenticated users

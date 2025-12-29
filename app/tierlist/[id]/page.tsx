@@ -338,14 +338,12 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
   return (
     <div className="min-h-screen bg-stripes pt-28 pb-12 px-4">
       <div className="container mx-auto max-w-5xl">
-        {/* Cover Image */}
         {tierlist.coverImageUrl && (
           <div className="mb-6 card-cartoon overflow-hidden">
             <img src={tierlist.coverImageUrl} alt={tierlist.title} className="w-full h-48 md:h-64 object-cover" />
           </div>
         )}
 
-        {/* Header Card */}
         <div className="card-cartoon p-6 mb-6">
           <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
             <h1 className="text-3xl font-black text-zinc-900 dark:text-white">{tierlist.title}</h1>
@@ -353,7 +351,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
               {!isOwner && (
                 <button onClick={handleUseTemplate} disabled={isCreatingFromTemplate} className="btn-cartoon btn-green flex items-center gap-2">
                   <Layers className="w-4 h-4" />
-                  {isCreatingFromTemplate ? "Creating..." : "Create My Version"}
+                  {isCreatingFromTemplate ? "Loading..." : "Rank This!"}
                 </button>
               )}
               {isOwner && (
@@ -369,7 +367,6 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
 
           {tierlist.description && <p className="text-zinc-500 mb-4">{tierlist.description}</p>}
 
-          {/* Author */}
           <div className="flex items-center gap-4 mb-4">
             {tierlist.user?.imageUrl ? (
               <img src={tierlist.user.imageUrl} alt={tierlist.user?.username || "User"} className="w-10 h-10 rounded-full border-2 border-zinc-900" />
@@ -384,9 +381,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
             </div>
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-2 flex-wrap">
-            {/* Vote buttons */}
             <div className="card-cartoon-sm flex items-center !rounded-full overflow-hidden !p-0">
               <button onClick={() => handleVote(1)} className={`px-3 py-2 transition-colors ${userVote === 1 ? "bg-[#E8F5E9] text-[#2E7D32]" : "hover:bg-zinc-100"}`}>
                 <ArrowBigUp className={`w-5 h-5 ${userVote === 1 ? "fill-current" : ""}`} />
@@ -426,9 +421,8 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
 
-        {/* Tier List Display */}
         <div className="space-y-3 mb-8">
-          {tierlist.tiers.sort((a, b) => a.order - b.order).map((tier) => (
+          {tierlist.tiers.filter((t) => t.name !== "__POOL__").sort((a, b) => a.order - b.order).map((tier) => (
             <div key={tier.id} className="card-cartoon overflow-hidden !rounded-2xl">
               <div className="flex">
                 <div className="w-24 flex items-center justify-center font-black text-lg shrink-0 p-3 break-words text-center" style={{ backgroundColor: tier.color, color: getContrastColor(tier.color) }}>
@@ -446,7 +440,6 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
           ))}
         </div>
 
-        {/* Comments Section */}
         <div className="card-cartoon p-6">
           <h2 className="text-2xl font-black mb-4 text-zinc-900 dark:text-white">
             Comments ({tierlist.comments.length})
