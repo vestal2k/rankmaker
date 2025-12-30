@@ -4,8 +4,7 @@ import { useEffect, useState, use } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Volume2, Film, Youtube, Bookmark, Link2, Layers, ArrowLeft, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Volume2, Film, Youtube, Bookmark, Link2, ArrowLeft, Loader2 } from "lucide-react";
 import { getContrastColor } from "@/lib/utils";
 
 type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF" | "YOUTUBE" | "TWITTER" | "INSTAGRAM";
@@ -160,7 +159,6 @@ function getAnonymousId(): string {
 
 export default function TierListPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
-  const router = useRouter();
   const { user, isSignedIn } = useUser();
   const [tierlist, setTierlist] = useState<TierListDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -170,7 +168,6 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
   const [newComment, setNewComment] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [isCreatingFromTemplate, setIsCreatingFromTemplate] = useState(false);
   const [anonymousId, setAnonymousId] = useState<string>("");
 
   useEffect(() => { setAnonymousId(getAnonymousId()); }, []);
@@ -289,19 +286,6 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
     }
   };
 
-  const handleUseTemplate = async () => {
-    setIsCreatingFromTemplate(true);
-    try {
-      const response = await fetch(`/api/tierlists/${resolvedParams.id}/use-template`, { method: "POST" });
-      if (!response.ok) throw new Error("Failed to use template");
-      const data = await response.json();
-      router.push(`/create?id=${data.id}`);
-    } catch (error) {
-      console.error("Error using template:", error);
-      setIsCreatingFromTemplate(false);
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-stripes pt-28 pb-12 px-4">
@@ -347,22 +331,14 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
         <div className="card-cartoon p-6 mb-6">
           <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
             <h1 className="text-3xl font-black text-zinc-900">{tierlist.title}</h1>
-            <div className="flex items-center gap-2">
-              {!isOwner && (
-                <button onClick={handleUseTemplate} disabled={isCreatingFromTemplate} className="btn-cartoon btn-green flex items-center gap-2">
-                  <Layers className="w-4 h-4" />
-                  {isCreatingFromTemplate ? "Loading..." : "Rank This!"}
+            {isOwner && (
+              <Link href={`/create?id=${tierlist.id}`}>
+                <button className="btn-cartoon btn-yellow flex items-center gap-2">
+                  <Edit className="w-4 h-4" />
+                  Edit
                 </button>
-              )}
-              {isOwner && (
-                <Link href={`/create?id=${tierlist.id}`}>
-                  <button className="btn-cartoon btn-yellow flex items-center gap-2">
-                    <Edit className="w-4 h-4" />
-                    Edit
-                  </button>
-                </Link>
-              )}
-            </div>
+              </Link>
+            )}
           </div>
 
           {tierlist.description && <p className="text-zinc-500 mb-4">{tierlist.description}</p>}
