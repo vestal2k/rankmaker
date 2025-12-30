@@ -276,7 +276,7 @@ export default function Home() {
 
       <section className="py-20 px-4">
         <div className="container mx-auto">
-          <div className="card-cartoon bg-[#FF6B6B] p-12 max-w-3xl mx-auto text-center">
+          <div className="card-cartoon !bg-[#FF6B6B] p-12 max-w-3xl mx-auto text-center">
             <h2 className="text-4xl font-black mb-4 text-white">
               Ready to Rank?
             </h2>
