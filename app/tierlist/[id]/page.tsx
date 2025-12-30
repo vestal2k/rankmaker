@@ -3,9 +3,30 @@
 import { useEffect, useState, use } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import Image from "next/image";
-import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Volume2, Film, Youtube, Bookmark, Link2, ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Volume2, Film, Youtube, Bookmark, Link2, ArrowLeft, Loader2, Save, RotateCcw } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { getContrastColor } from "@/lib/utils";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  DragOverEvent,
+  useDroppable,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF" | "YOUTUBE" | "TWITTER" | "INSTAGRAM";
 
@@ -118,6 +139,14 @@ function MediaPreview({ item, className = "" }: { item: TierItem; className?: st
   }
 }
 
+interface UserTier {
+  id: string;
+  name: string;
+  color: string;
+  order: number;
+  items: TierItem[];
+}
+
 interface Tier {
   id: string;
   name: string;
@@ -157,8 +186,45 @@ function getAnonymousId(): string {
   return id;
 }
 
+function SortableItem({ item, isDragging }: { item: TierItem; isDragging?: boolean }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="w-16 h-16 cursor-grab active:cursor-grabbing touch-none">
+      <MediaPreview item={item} className="border-2 border-zinc-900" />
+    </div>
+  );
+}
+
+function DroppableTier({ tier, children }: { tier: UserTier; children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: tier.id });
+
+  return (
+    <div ref={setNodeRef} className={`flex-1 min-h-[80px] p-3 flex flex-wrap gap-2 items-start bg-white transition-colors ${isOver ? "bg-zinc-100" : ""}`}>
+      {children}
+    </div>
+  );
+}
+
+function DroppablePool({ children }: { children: React.ReactNode }) {
+  const { setNodeRef, isOver } = useDroppable({ id: "__POOL__" });
+
+  return (
+    <div ref={setNodeRef} className={`min-h-[100px] p-4 flex flex-wrap gap-2 items-start transition-colors ${isOver ? "bg-zinc-200" : "bg-zinc-100"}`}>
+      {children}
+    </div>
+  );
+}
+
 export default function TierListPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
+  const router = useRouter();
   const { user, isSignedIn } = useUser();
   const [tierlist, setTierlist] = useState<TierListDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -170,6 +236,17 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
   const [copySuccess, setCopySuccess] = useState(false);
   const [anonymousId, setAnonymousId] = useState<string>("");
 
+  const [userTiers, setUserTiers] = useState<UserTier[]>([]);
+  const [unplacedItems, setUnplacedItems] = useState<TierItem[]>([]);
+  const [activeItem, setActiveItem] = useState<TierItem | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
   useEffect(() => { setAnonymousId(getAnonymousId()); }, []);
   useEffect(() => { loadTierList(); }, [resolvedParams.id, anonymousId]);
 
@@ -179,6 +256,21 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
       if (!response.ok) throw new Error("Failed to load tier list");
       const data = await response.json();
       setTierlist(data);
+
+      const poolTier = data.tiers.find((t: Tier) => t.name === "__POOL__");
+      const regularTiers = data.tiers.filter((t: Tier) => t.name !== "__POOL__").sort((a: Tier, b: Tier) => a.order - b.order);
+
+      const allItems: TierItem[] = [];
+      regularTiers.forEach((tier: Tier) => {
+        tier.items.forEach((item: TierItem) => allItems.push(item));
+      });
+      if (poolTier) {
+        poolTier.items.forEach((item: TierItem) => allItems.push(item));
+      }
+
+      setUnplacedItems(allItems);
+      setUserTiers(regularTiers.map((t: Tier) => ({ ...t, items: [] })));
+
       if (data.votes) {
         const score = data.votes.reduce((sum: number, vote: { value: number }) => sum + vote.value, 0);
         setVoteScore(score);
@@ -208,6 +300,162 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
       console.error("Error loading tier list:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const item = findItem(active.id as string);
+    setActiveItem(item || null);
+  };
+
+  const handleDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId) || overId;
+
+    if (activeContainer !== overContainer) {
+      setHasChanges(true);
+      const item = findItem(activeId);
+      if (!item) return;
+
+      if (activeContainer === "__POOL__") {
+        setUnplacedItems((prev) => prev.filter((i) => i.id !== activeId));
+      } else {
+        setUserTiers((prev) =>
+          prev.map((t) =>
+            t.id === activeContainer ? { ...t, items: t.items.filter((i) => i.id !== activeId) } : t
+          )
+        );
+      }
+
+      if (overContainer === "__POOL__") {
+        setUnplacedItems((prev) => [...prev, item]);
+      } else {
+        setUserTiers((prev) =>
+          prev.map((t) =>
+            t.id === overContainer ? { ...t, items: [...t.items, item] } : t
+          )
+        );
+      }
+    }
+  };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    setActiveItem(null);
+
+    if (!over) return;
+
+    const activeId = active.id as string;
+    const overId = over.id as string;
+
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+
+    if (activeContainer && overContainer && activeContainer === overContainer && activeId !== overId) {
+      setHasChanges(true);
+      if (activeContainer === "__POOL__") {
+        setUnplacedItems((prev) => {
+          const oldIndex = prev.findIndex((i) => i.id === activeId);
+          const newIndex = prev.findIndex((i) => i.id === overId);
+          return arrayMove(prev, oldIndex, newIndex);
+        });
+      } else {
+        setUserTiers((prev) =>
+          prev.map((t) => {
+            if (t.id !== activeContainer) return t;
+            const oldIndex = t.items.findIndex((i) => i.id === activeId);
+            const newIndex = t.items.findIndex((i) => i.id === overId);
+            return { ...t, items: arrayMove(t.items, oldIndex, newIndex) };
+          })
+        );
+      }
+    }
+  };
+
+  const findItem = (id: string): TierItem | undefined => {
+    const poolItem = unplacedItems.find((i) => i.id === id);
+    if (poolItem) return poolItem;
+    for (const tier of userTiers) {
+      const item = tier.items.find((i) => i.id === id);
+      if (item) return item;
+    }
+    return undefined;
+  };
+
+  const findContainer = (id: string): string | undefined => {
+    if (unplacedItems.find((i) => i.id === id)) return "__POOL__";
+    for (const tier of userTiers) {
+      if (tier.items.find((i) => i.id === id)) return tier.id;
+    }
+    return undefined;
+  };
+
+  const handleReset = () => {
+    if (!tierlist) return;
+    const poolTier = tierlist.tiers.find((t) => t.name === "__POOL__");
+    const regularTiers = tierlist.tiers.filter((t) => t.name !== "__POOL__").sort((a, b) => a.order - b.order);
+
+    const allItems: TierItem[] = [];
+    regularTiers.forEach((tier) => {
+      tier.items.forEach((item) => allItems.push(item));
+    });
+    if (poolTier) {
+      poolTier.items.forEach((item) => allItems.push(item));
+    }
+
+    setUnplacedItems(allItems);
+    setUserTiers(regularTiers.map((t) => ({ ...t, items: [] })));
+    setHasChanges(false);
+  };
+
+  const handleSaveRanking = async () => {
+    if (!tierlist || !isSignedIn) return;
+    setIsSaving(true);
+    try {
+      const response = await fetch("/api/tierlists", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `My ranking: ${tierlist.title}`,
+          description: `Based on template by ${tierlist.user?.username || "Anonymous"}`,
+          isPublic: true,
+          tiers: userTiers.map((tier, index) => ({
+            name: tier.name,
+            color: tier.color,
+            order: index,
+            items: tier.items.map((item, itemIndex) => ({
+              mediaUrl: item.mediaUrl,
+              mediaType: item.mediaType,
+              coverImageUrl: item.coverImageUrl,
+              embedId: item.embedId,
+              label: item.label,
+              order: itemIndex,
+            })),
+          })),
+          poolItems: unplacedItems.map((item, index) => ({
+            mediaUrl: item.mediaUrl,
+            mediaType: item.mediaType,
+            coverImageUrl: item.coverImageUrl,
+            embedId: item.embedId,
+            label: item.label,
+            order: index,
+          })),
+        }),
+      });
+      if (!response.ok) throw new Error("Failed to save ranking");
+      const data = await response.json();
+      router.push(`/tierlist/${data.id}`);
+    } catch (error) {
+      console.error("Error saving ranking:", error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -318,6 +566,8 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
   }
 
   const isOwner = isSignedIn && tierlist.user?.id === user?.id;
+  const totalItems = unplacedItems.length + userTiers.reduce((sum, t) => sum + t.items.length, 0);
+  const placedItems = userTiers.reduce((sum, t) => sum + t.items.length, 0);
 
   return (
     <div className="min-h-screen bg-stripes pt-28 pb-12 px-4">
@@ -397,24 +647,74 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
 
-        <div className="space-y-3 mb-8">
-          {tierlist.tiers.filter((t) => t.name !== "__POOL__").sort((a, b) => a.order - b.order).map((tier) => (
-            <div key={tier.id} className="card-cartoon overflow-hidden !rounded-2xl">
-              <div className="flex">
-                <div className="w-24 flex items-center justify-center font-black text-lg shrink-0 p-3 break-words text-center" style={{ backgroundColor: tier.color, color: getContrastColor(tier.color) }}>
-                  {tier.name}
-                </div>
-                <div className="flex-1 min-h-[80px] p-3 flex flex-wrap gap-2 items-start bg-white">
-                  {tier.items.sort((a, b) => a.order - b.order).map((item) => (
-                    <div key={item.id} className="w-16 h-16">
-                      <MediaPreview item={item} className="border-2 border-zinc-900" />
-                    </div>
-                  ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="space-y-3 mb-6">
+            {userTiers.map((tier) => (
+              <div key={tier.id} className="card-cartoon overflow-hidden !rounded-2xl">
+                <div className="flex">
+                  <div className="w-24 flex items-center justify-center font-black text-lg shrink-0 p-3 break-words text-center" style={{ backgroundColor: tier.color, color: getContrastColor(tier.color) }}>
+                    {tier.name}
+                  </div>
+                  <SortableContext items={tier.items.map((i) => i.id)} strategy={rectSortingStrategy}>
+                    <DroppableTier tier={tier}>
+                      {tier.items.map((item) => (
+                        <SortableItem key={item.id} item={item} isDragging={activeItem?.id === item.id} />
+                      ))}
+                    </DroppableTier>
+                  </SortableContext>
                 </div>
               </div>
+            ))}
+          </div>
+
+          <div className="card-cartoon overflow-hidden !rounded-2xl mb-6">
+            <div className="bg-zinc-800 text-white px-4 py-2 font-bold flex items-center justify-between">
+              <span>Items ({placedItems}/{totalItems} placed)</span>
+              <div className="flex items-center gap-2">
+                {hasChanges && (
+                  <button onClick={handleReset} className="btn-cartoon btn-white !py-1 !px-3 !text-sm flex items-center gap-1">
+                    <RotateCcw className="w-3 h-3" />
+                    Reset
+                  </button>
+                )}
+                {isSignedIn && placedItems > 0 && (
+                  <button onClick={handleSaveRanking} disabled={isSaving} className="btn-cartoon btn-green !py-1 !px-3 !text-sm flex items-center gap-1">
+                    <Save className="w-3 h-3" />
+                    {isSaving ? "Saving..." : "Save my ranking"}
+                  </button>
+                )}
+                {!isSignedIn && placedItems > 0 && (
+                  <span className="text-xs text-zinc-400">Sign in to save</span>
+                )}
+              </div>
             </div>
-          ))}
-        </div>
+            <SortableContext items={unplacedItems.map((i) => i.id)} strategy={rectSortingStrategy}>
+              <DroppablePool>
+                {unplacedItems.length === 0 ? (
+                  <p className="text-zinc-500 text-sm">All items have been placed!</p>
+                ) : (
+                  unplacedItems.map((item) => (
+                    <SortableItem key={item.id} item={item} isDragging={activeItem?.id === item.id} />
+                  ))
+                )}
+              </DroppablePool>
+            </SortableContext>
+          </div>
+
+          <DragOverlay>
+            {activeItem && (
+              <div className="w-16 h-16 opacity-80">
+                <MediaPreview item={activeItem} className="border-2 border-zinc-900 shadow-lg" />
+              </div>
+            )}
+          </DragOverlay>
+        </DndContext>
 
         <div className="card-cartoon p-6">
           <h2 className="text-2xl font-black mb-4 text-zinc-900">
