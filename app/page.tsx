@@ -79,8 +79,8 @@ export default function Home() {
                 <Image
                   src="/logo.png"
                   alt="Rankmaker Fox Mascot"
-                  width={140}
-                  height={140}
+                  width={200}
+                  height={200}
                   className="drop-shadow-2xl hover-wiggle cursor-pointer"
                   priority
                 />
@@ -203,7 +203,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
               {topTierlists.map((tierlist) => (
                 <Link key={tierlist.id} href={`/tierlist/${tierlist.id}`}>
-                  <div className="card-cartoon overflow-hidden cursor-pointer h-full flex flex-col">
+                  <div className="card-cartoon card-cartoon-hover overflow-hidden cursor-pointer h-full flex flex-col">
                     {tierlist.coverImageUrl ? (
                       <div className="w-full h-44 overflow-hidden flex-shrink-0">
                         <img
@@ -297,18 +297,20 @@ export default function Home() {
       <footer className="py-8 px-4">
         <div className="container mx-auto">
           <div className="card-cartoon-sm p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 group cursor-pointer">
+            <Link
+              href="/"
+              className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border-3 border-transparent transition-all duration-150 hover:border-[#1a1a1a] hover:bg-white hover:shadow-[4px_4px_0_#1a1a1a] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0_#1a1a1a]"
+            >
               <Image
                 src="/logo.png"
                 alt="Rankmaker"
                 width={32}
                 height={32}
-                className="group-hover:animate-wiggle"
               />
               <span className="text-lg font-black text-zinc-900">
                 Rankmaker
               </span>
-            </div>
+            </Link>
             <p className="text-zinc-700 text-sm font-medium">
               Made by{" "}
               <a
