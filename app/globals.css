@@ -202,6 +202,18 @@
   box-shadow: 2px 2px 0 #1a1a1a;
 }
 
+.btn-cartoon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+
+.btn-cartoon:disabled:hover {
+  transform: none;
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+
 .btn-coral {
   @apply bg-[#FF6B6B] text-white;
 }
