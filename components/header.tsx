@@ -13,7 +13,7 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-4">
       <div className="container mx-auto">
-        <div className="card-cartoon-sm !rounded-full px-4 py-2 flex items-center justify-between">
+        <div className="card-cartoon-sm !rounded-full px-6 py-2 flex items-center justify-between overflow-visible">
           <Link
             href="/"
             className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border-3 border-transparent transition-all duration-150 hover:border-[#1a1a1a] hover:bg-white hover:shadow-[4px_4px_0_#1a1a1a] hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0_#1a1a1a]"
