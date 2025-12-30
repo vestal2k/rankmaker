@@ -319,7 +319,7 @@
 @layer base {
   :root {
     /* Playful warm colors */
-    --background: 45 100% 94%;
+    --background: 45 40% 95%;
     --foreground: 0 0% 10%;
     --card: 0 0% 100%;
     --card-foreground: 0 0% 10%;
@@ -345,8 +345,8 @@
     --chart-5: 340 80% 60%;
     --radius: 1.5rem;
 
-    --stripe-color: 35 100% 78%;
-    --stripe-dark: 35 100% 72%;
+    --stripe-color: 45 40% 93%;
+    --stripe-dark: 45 35% 88%;
   }
 
 }

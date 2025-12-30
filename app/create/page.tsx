@@ -1292,7 +1292,7 @@ function CreatePageContent() {
               <div className="w-10 h-10 bg-[#FFD43B] rounded-xl flex items-center justify-center border-2 border-zinc-900">
                 <Settings className="w-5 h-5 text-zinc-900" />
               </div>
-              <h2 className="text-xl font-black text-zinc-900 dark:text-white">Tierlist Settings</h2>
+              <h2 className="text-xl font-black text-zinc-900">Tierlist Settings</h2>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -1567,7 +1567,7 @@ function CreatePageContent() {
 
         {/* Unplaced Items (Pool) */}
         <div className="card-cartoon p-6">
-          <h3 className="text-xl font-black mb-4 text-zinc-900 dark:text-white">Pool</h3>
+          <h3 className="text-xl font-black mb-4 text-zinc-900">Pool</h3>
           <SortableContext
             items={unplacedItems.map((i) => i.id)}
             strategy={rectSortingStrategy}
@@ -1584,7 +1584,7 @@ function CreatePageContent() {
               ))}
             </DroppablePoolZone>
           </SortableContext>
-          <div className="mt-4 pt-4 border-t-2 border-zinc-200 dark:border-zinc-700 flex gap-3 flex-wrap">
+          <div className="mt-4 pt-4 border-t-2 border-zinc-200 flex gap-3 flex-wrap">
             <label
               htmlFor="pool-media-upload"
               className="flex-1 min-w-[140px]"
@@ -1633,7 +1633,7 @@ function CreatePageContent() {
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-black text-zinc-900 dark:text-white">Add Link</h3>
+                <h3 className="text-xl font-black text-zinc-900">Add Link</h3>
                 <button
                   onClick={() => {
                     setShowEmbedDialog(false);

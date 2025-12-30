@@ -346,7 +346,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
 
         <div className="card-cartoon p-6 mb-6">
           <div className="flex items-start justify-between mb-4 flex-wrap gap-4">
-            <h1 className="text-3xl font-black text-zinc-900 dark:text-white">{tierlist.title}</h1>
+            <h1 className="text-3xl font-black text-zinc-900">{tierlist.title}</h1>
             <div className="flex items-center gap-2">
               {!isOwner && (
                 <button onClick={handleUseTemplate} disabled={isCreatingFromTemplate} className="btn-cartoon btn-green flex items-center gap-2">
@@ -376,7 +376,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
               </div>
             )}
             <div>
-              <p className="font-bold text-zinc-900 dark:text-white">{tierlist.user?.username || "Anonymous"}</p>
+              <p className="font-bold text-zinc-900">{tierlist.user?.username || "Anonymous"}</p>
               <p className="text-sm text-zinc-500">{new Date(tierlist.createdAt).toLocaleDateString()}</p>
             </div>
           </div>
@@ -428,7 +428,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
                 <div className="w-24 flex items-center justify-center font-black text-lg shrink-0 p-3 break-words text-center" style={{ backgroundColor: tier.color, color: getContrastColor(tier.color) }}>
                   {tier.name}
                 </div>
-                <div className="flex-1 min-h-[80px] p-3 flex flex-wrap gap-2 items-start bg-white dark:bg-zinc-800">
+                <div className="flex-1 min-h-[80px] p-3 flex flex-wrap gap-2 items-start bg-white">
                   {tier.items.sort((a, b) => a.order - b.order).map((item) => (
                     <div key={item.id} className="w-16 h-16">
                       <MediaPreview item={item} className="border-2 border-zinc-900" />
@@ -441,7 +441,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
         </div>
 
         <div className="card-cartoon p-6">
-          <h2 className="text-2xl font-black mb-4 text-zinc-900 dark:text-white">
+          <h2 className="text-2xl font-black mb-4 text-zinc-900">
             Comments ({tierlist.comments.length})
           </h2>
 
@@ -475,10 +475,10 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
                   )}
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-bold text-zinc-900 dark:text-white">{comment.user.username}</span>
+                      <span className="font-bold text-zinc-900">{comment.user.username}</span>
                       <span className="text-sm text-zinc-500">{new Date(comment.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <p className="text-zinc-600 dark:text-zinc-300">{comment.content}</p>
+                    <p className="text-zinc-600">{comment.content}</p>
                   </div>
                 </div>
               </div>
