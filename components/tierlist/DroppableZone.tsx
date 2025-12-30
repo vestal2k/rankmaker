@@ -1,0 +1,88 @@
+"use client";
+
+import { useDroppable } from "@dnd-kit/core";
+import type { Tier } from "./types";
+
+interface DroppableTierZoneProps {
+  tier: Tier;
+  children: React.ReactNode;
+  isOver: boolean;
+}
+
+export function DroppableTierZone({ tier, children, isOver }: DroppableTierZoneProps) {
+  const { setNodeRef } = useDroppable({
+    id: tier.id,
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex-1 min-h-[80px] p-2 flex flex-wrap gap-2 items-start content-start transition-colors ${
+        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset" : "bg-secondary/20"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+interface DroppablePoolZoneProps {
+  children: React.ReactNode;
+  isOver: boolean;
+}
+
+export function DroppablePoolZone({ children, isOver }: DroppablePoolZoneProps) {
+  const { setNodeRef } = useDroppable({
+    id: "unplaced",
+  });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex flex-wrap gap-2 min-h-[80px] p-2 rounded transition-colors ${
+        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset" : ""
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+interface ViewDroppableTierProps {
+  tier: { id: string; name: string; color: string };
+  children: React.ReactNode;
+}
+
+export function ViewDroppableTier({ tier, children }: ViewDroppableTierProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: tier.id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex-1 min-h-[80px] p-3 flex flex-wrap gap-2 items-start bg-white transition-colors ${
+        isOver ? "bg-zinc-100" : ""
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+interface ViewDroppablePoolProps {
+  children: React.ReactNode;
+}
+
+export function ViewDroppablePool({ children }: ViewDroppablePoolProps) {
+  const { setNodeRef, isOver } = useDroppable({ id: "__POOL__" });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={`min-h-[100px] p-4 flex flex-wrap gap-2 items-start transition-colors ${
+        isOver ? "bg-zinc-200" : "bg-zinc-100"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}

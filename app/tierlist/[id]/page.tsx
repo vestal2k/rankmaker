@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
-import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Volume2, Film, Youtube, Bookmark, Link2, ArrowLeft, Loader2, Save, RotateCcw } from "lucide-react";
+import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Bookmark, Link2, ArrowLeft, Loader2, Save, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getContrastColor } from "@/lib/utils";
 import {
@@ -17,149 +17,29 @@ import {
   DragOverlay,
   DragStartEvent,
   DragOverEvent,
-  useDroppable,
 } from "@dnd-kit/core";
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
-type MediaType = "IMAGE" | "VIDEO" | "AUDIO" | "GIF" | "YOUTUBE" | "TWITTER" | "INSTAGRAM";
-
-interface TierItem {
-  id: string;
-  mediaUrl: string;
-  mediaType: MediaType;
-  coverImageUrl?: string | null;
-  embedId?: string | null;
-  label: string | null;
-  order: number;
-}
-
-function getYouTubeThumbnail(videoId: string): string {
-  return `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`;
-}
-
-function MediaPreview({ item, className = "" }: { item: TierItem; className?: string }) {
-  switch (item.mediaType) {
-    case "YOUTUBE":
-      return (
-        <div className={`relative ${className}`}>
-          <img
-            src={item.embedId ? getYouTubeThumbnail(item.embedId) : item.coverImageUrl || ""}
-            alt={item.label || "YouTube video"}
-            className="w-full h-full object-cover rounded"
-          />
-          <div className="absolute bottom-0.5 right-0.5 bg-red-600 rounded p-0.5">
-            <Youtube className="w-3 h-3 text-white" />
-          </div>
-        </div>
-      );
-    case "TWITTER":
-      return (
-        <div className={`relative ${className}`}>
-          {item.coverImageUrl ? (
-            <img src={item.coverImageUrl} alt={item.label || "Tweet"} className="w-full h-full object-cover rounded" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center rounded">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-            </div>
-          )}
-          <div className="absolute bottom-0.5 right-0.5 bg-black rounded p-0.5">
-            <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-          </div>
-        </div>
-      );
-    case "INSTAGRAM":
-      return (
-        <div className={`relative ${className}`}>
-          {item.coverImageUrl ? (
-            <img src={item.coverImageUrl} alt={item.label || "Instagram post"} className="w-full h-full object-cover rounded" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center rounded">
-              <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-              </svg>
-            </div>
-          )}
-          <div className="absolute bottom-0.5 right-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded p-0.5">
-            <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-            </svg>
-          </div>
-        </div>
-      );
-    case "VIDEO":
-      return (
-        <div className={`relative ${className}`}>
-          <video src={item.mediaUrl} className="w-full h-full object-cover rounded" muted loop playsInline
-            onMouseEnter={(e) => e.currentTarget.play()}
-            onMouseLeave={(e) => { e.currentTarget.pause(); e.currentTarget.currentTime = 0; }}
-          />
-          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
-            <Film className="w-3 h-3 text-white" />
-          </div>
-        </div>
-      );
-    case "AUDIO":
-      return (
-        <div className={`relative ${className}`}>
-          {item.coverImageUrl ? (
-            <img src={item.coverImageUrl} alt={item.label || "Audio cover"} className="w-full h-full object-cover rounded" />
-          ) : (
-            <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center rounded">
-              <Volume2 className="w-8 h-8 text-white" />
-            </div>
-          )}
-          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
-            <Volume2 className="w-3 h-3 text-white" />
-          </div>
-        </div>
-      );
-    case "GIF":
-      return (
-        <div className={`relative ${className}`}>
-          <img src={item.mediaUrl} alt={item.label || ""} className="w-full h-full object-cover rounded" />
-          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded px-1">
-            <span className="text-[10px] font-bold text-white">GIF</span>
-          </div>
-        </div>
-      );
-    case "IMAGE":
-    default:
-      return <img src={item.mediaUrl} alt={item.label || ""} className={`w-full h-full object-cover rounded ${className}`} />;
-  }
-}
-
-interface UserTier {
-  id: string;
-  name: string;
-  color: string;
-  order: number;
-  items: TierItem[];
-}
-
-interface Tier {
-  id: string;
-  name: string;
-  color: string;
-  order: number;
-  items: TierItem[];
-}
+import {
+  type TierItem,
+  type Tier,
+  POOL_TIER_NAME,
+  MediaPreview,
+  SimpleSortableItem,
+  ViewDroppableTier,
+  ViewDroppablePool,
+} from "@/components/tierlist";
 
 interface Comment {
   id: string;
   content: string;
   createdAt: string;
-  user: { username: string; imageUrl: string | null; };
+  user: { username: string; imageUrl: string | null };
 }
 
 interface TierListDetail {
@@ -169,11 +49,11 @@ interface TierListDetail {
   coverImageUrl: string | null;
   isPublic: boolean;
   createdAt: string;
-  user: { id: string; username: string; imageUrl: string | null; };
+  user: { id: string; username: string; imageUrl: string | null };
   tiers: Tier[];
   comments: Comment[];
   votes: { userId: string; value: number }[];
-  _count: { votes: number; comments: number; };
+  _count: { votes: number; comments: number };
 }
 
 function getAnonymousId(): string {
@@ -184,42 +64,6 @@ function getAnonymousId(): string {
     localStorage.setItem("rankmaker_anonymous_id", id);
   }
   return id;
-}
-
-function SortableItem({ item, isDragging }: { item: TierItem; isDragging?: boolean }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className="w-16 h-16 cursor-grab active:cursor-grabbing touch-none">
-      <MediaPreview item={item} className="border-2 border-zinc-900" />
-    </div>
-  );
-}
-
-function DroppableTier({ tier, children }: { tier: UserTier; children: React.ReactNode }) {
-  const { setNodeRef, isOver } = useDroppable({ id: tier.id });
-
-  return (
-    <div ref={setNodeRef} className={`flex-1 min-h-[80px] p-3 flex flex-wrap gap-2 items-start bg-white transition-colors ${isOver ? "bg-zinc-100" : ""}`}>
-      {children}
-    </div>
-  );
-}
-
-function DroppablePool({ children }: { children: React.ReactNode }) {
-  const { setNodeRef, isOver } = useDroppable({ id: "__POOL__" });
-
-  return (
-    <div ref={setNodeRef} className={`min-h-[100px] p-4 flex flex-wrap gap-2 items-start transition-colors ${isOver ? "bg-zinc-200" : "bg-zinc-100"}`}>
-      {children}
-    </div>
-  );
 }
 
 export default function TierListPage({ params }: { params: Promise<{ id: string }> }) {
@@ -236,7 +80,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
   const [copySuccess, setCopySuccess] = useState(false);
   const [anonymousId, setAnonymousId] = useState<string>("");
 
-  const [userTiers, setUserTiers] = useState<UserTier[]>([]);
+  const [userTiers, setUserTiers] = useState<Tier[]>([]);
   const [unplacedItems, setUnplacedItems] = useState<TierItem[]>([]);
   const [activeItem, setActiveItem] = useState<TierItem | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -247,8 +91,13 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  useEffect(() => { setAnonymousId(getAnonymousId()); }, []);
-  useEffect(() => { loadTierList(); }, [resolvedParams.id, anonymousId]);
+  useEffect(() => {
+    setAnonymousId(getAnonymousId());
+  }, []);
+
+  useEffect(() => {
+    loadTierList();
+  }, [resolvedParams.id, anonymousId]);
 
   const loadTierList = async () => {
     try {
@@ -257,15 +106,15 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
       const data = await response.json();
       setTierlist(data);
 
-      const poolTier = data.tiers.find((t: Tier) => t.name === "__POOL__");
-      const regularTiers = data.tiers.filter((t: Tier) => t.name !== "__POOL__").sort((a: Tier, b: Tier) => a.order - b.order);
+      const poolTier = data.tiers.find((t: Tier) => t.name === POOL_TIER_NAME);
+      const regularTiers = data.tiers.filter((t: Tier) => t.name !== POOL_TIER_NAME).sort((a: Tier, b: Tier) => (a.order || 0) - (b.order || 0));
 
       const allItems: TierItem[] = [];
       regularTiers.forEach((tier: Tier) => {
-        tier.items.forEach((item: TierItem) => allItems.push(item));
+        tier.items.forEach((tierItem: TierItem) => allItems.push(tierItem));
       });
       if (poolTier) {
-        poolTier.items.forEach((item: TierItem) => allItems.push(item));
+        poolTier.items.forEach((tierItem: TierItem) => allItems.push(tierItem));
       }
 
       setUnplacedItems(allItems);
@@ -275,6 +124,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
         const score = data.votes.reduce((sum: number, vote: { value: number }) => sum + vote.value, 0);
         setVoteScore(score);
       }
+
       if (anonymousId || isSignedIn) {
         try {
           const voteUrl = isSignedIn
@@ -285,8 +135,9 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
             const voteData = await voteResponse.json();
             setUserVote(voteData.userVote);
           }
-        } catch { }
+        } catch {}
       }
+
       if (isSignedIn) {
         try {
           const savedResponse = await fetch(`/api/tierlists/${resolvedParams.id}/save`);
@@ -294,7 +145,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
             const savedData = await savedResponse.json();
             setIsSaved(savedData.isSaved);
           }
-        } catch { }
+        } catch {}
       }
     } catch (error) {
       console.error("Error loading tier list:", error);
@@ -305,8 +156,8 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
 
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
-    const item = findItem(active.id as string);
-    setActiveItem(item || null);
+    const foundItem = findItem(active.id as string);
+    setActiveItem(foundItem || null);
   };
 
   const handleDragOver = (event: DragOverEvent) => {
@@ -319,30 +170,26 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
     const activeContainer = findContainer(activeId);
     const overContainer = findContainer(overId) || overId;
 
-    if (activeContainer !== overContainer) {
-      setHasChanges(true);
-      const item = findItem(activeId);
-      if (!item) return;
+    if (activeContainer === overContainer) return;
 
-      if (activeContainer === "__POOL__") {
-        setUnplacedItems((prev) => prev.filter((i) => i.id !== activeId));
-      } else {
-        setUserTiers((prev) =>
-          prev.map((t) =>
-            t.id === activeContainer ? { ...t, items: t.items.filter((i) => i.id !== activeId) } : t
-          )
-        );
-      }
+    setHasChanges(true);
+    const foundItem = findItem(activeId);
+    if (!foundItem) return;
 
-      if (overContainer === "__POOL__") {
-        setUnplacedItems((prev) => [...prev, item]);
-      } else {
-        setUserTiers((prev) =>
-          prev.map((t) =>
-            t.id === overContainer ? { ...t, items: [...t.items, item] } : t
-          )
-        );
-      }
+    if (activeContainer === POOL_TIER_NAME) {
+      setUnplacedItems((prev) => prev.filter((i) => i.id !== activeId));
+    } else {
+      setUserTiers((prev) =>
+        prev.map((t) => (t.id === activeContainer ? { ...t, items: t.items.filter((i) => i.id !== activeId) } : t))
+      );
+    }
+
+    if (overContainer === POOL_TIER_NAME) {
+      setUnplacedItems((prev) => [...prev, foundItem]);
+    } else {
+      setUserTiers((prev) =>
+        prev.map((t) => (t.id === overContainer ? { ...t, items: [...t.items, foundItem] } : t))
+      );
     }
   };
 
@@ -358,24 +205,24 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
     const activeContainer = findContainer(activeId);
     const overContainer = findContainer(overId);
 
-    if (activeContainer && overContainer && activeContainer === overContainer && activeId !== overId) {
-      setHasChanges(true);
-      if (activeContainer === "__POOL__") {
-        setUnplacedItems((prev) => {
-          const oldIndex = prev.findIndex((i) => i.id === activeId);
-          const newIndex = prev.findIndex((i) => i.id === overId);
-          return arrayMove(prev, oldIndex, newIndex);
-        });
-      } else {
-        setUserTiers((prev) =>
-          prev.map((t) => {
-            if (t.id !== activeContainer) return t;
-            const oldIndex = t.items.findIndex((i) => i.id === activeId);
-            const newIndex = t.items.findIndex((i) => i.id === overId);
-            return { ...t, items: arrayMove(t.items, oldIndex, newIndex) };
-          })
-        );
-      }
+    if (!activeContainer || !overContainer || activeContainer !== overContainer || activeId === overId) return;
+
+    setHasChanges(true);
+    if (activeContainer === POOL_TIER_NAME) {
+      setUnplacedItems((prev) => {
+        const oldIndex = prev.findIndex((i) => i.id === activeId);
+        const newIndex = prev.findIndex((i) => i.id === overId);
+        return arrayMove(prev, oldIndex, newIndex);
+      });
+    } else {
+      setUserTiers((prev) =>
+        prev.map((t) => {
+          if (t.id !== activeContainer) return t;
+          const oldIndex = t.items.findIndex((i) => i.id === activeId);
+          const newIndex = t.items.findIndex((i) => i.id === overId);
+          return { ...t, items: arrayMove(t.items, oldIndex, newIndex) };
+        })
+      );
     }
   };
 
@@ -383,14 +230,14 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
     const poolItem = unplacedItems.find((i) => i.id === id);
     if (poolItem) return poolItem;
     for (const tier of userTiers) {
-      const item = tier.items.find((i) => i.id === id);
-      if (item) return item;
+      const foundItem = tier.items.find((i) => i.id === id);
+      if (foundItem) return foundItem;
     }
     return undefined;
   };
 
   const findContainer = (id: string): string | undefined => {
-    if (unplacedItems.find((i) => i.id === id)) return "__POOL__";
+    if (unplacedItems.find((i) => i.id === id)) return POOL_TIER_NAME;
     for (const tier of userTiers) {
       if (tier.items.find((i) => i.id === id)) return tier.id;
     }
@@ -399,15 +246,15 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
 
   const handleReset = () => {
     if (!tierlist) return;
-    const poolTier = tierlist.tiers.find((t) => t.name === "__POOL__");
-    const regularTiers = tierlist.tiers.filter((t) => t.name !== "__POOL__").sort((a, b) => a.order - b.order);
+    const poolTier = tierlist.tiers.find((t) => t.name === POOL_TIER_NAME);
+    const regularTiers = tierlist.tiers.filter((t) => t.name !== POOL_TIER_NAME).sort((a, b) => (a.order || 0) - (b.order || 0));
 
     const allItems: TierItem[] = [];
     regularTiers.forEach((tier) => {
-      tier.items.forEach((item) => allItems.push(item));
+      tier.items.forEach((tierItem) => allItems.push(tierItem));
     });
     if (poolTier) {
-      poolTier.items.forEach((item) => allItems.push(item));
+      poolTier.items.forEach((tierItem) => allItems.push(tierItem));
     }
 
     setUnplacedItems(allItems);
@@ -430,21 +277,21 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
             name: tier.name,
             color: tier.color,
             order: index,
-            items: tier.items.map((item, itemIndex) => ({
-              mediaUrl: item.mediaUrl,
-              mediaType: item.mediaType,
-              coverImageUrl: item.coverImageUrl,
-              embedId: item.embedId,
-              label: item.label,
+            items: tier.items.map((tierItem, itemIndex) => ({
+              mediaUrl: tierItem.mediaUrl,
+              mediaType: tierItem.mediaType,
+              coverImageUrl: tierItem.coverImageUrl,
+              embedId: tierItem.embedId,
+              label: tierItem.label,
               order: itemIndex,
             })),
           })),
-          poolItems: unplacedItems.map((item, index) => ({
-            mediaUrl: item.mediaUrl,
-            mediaType: item.mediaType,
-            coverImageUrl: item.coverImageUrl,
-            embedId: item.embedId,
-            label: item.label,
+          poolItems: unplacedItems.map((tierItem, index) => ({
+            mediaUrl: tierItem.mediaUrl,
+            mediaType: tierItem.mediaType,
+            coverImageUrl: tierItem.coverImageUrl,
+            embedId: tierItem.embedId,
+            label: tierItem.label,
             order: index,
           })),
         }),
@@ -473,9 +320,13 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
       const newVote = data.userVote;
       setUserVote(newVote);
       let scoreChange = 0;
-      if (oldVote === null && newVote !== null) scoreChange = newVote;
-      else if (oldVote !== null && newVote === null) scoreChange = -oldVote;
-      else if (oldVote !== null && newVote !== null) scoreChange = newVote - oldVote;
+      if (oldVote === null && newVote !== null) {
+        scoreChange = newVote;
+      } else if (oldVote !== null && newVote === null) {
+        scoreChange = -oldVote;
+      } else if (oldVote !== null && newVote !== null) {
+        scoreChange = newVote - oldVote;
+      }
       setVoteScore((prev) => prev + scoreChange);
     } catch (error) {
       console.error("Error voting:", error);
@@ -505,13 +356,15 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
 
   const handleShare = (platform: string) => {
     const url = encodeURIComponent(window.location.href);
-    const title = encodeURIComponent(tierlist?.title || "Check out this tier list!");
+    const shareTitle = encodeURIComponent(tierlist?.title || "Check out this tier list!");
     const shareUrls: Record<string, string> = {
-      twitter: `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+      twitter: `https://twitter.com/intent/tweet?url=${url}&text=${shareTitle}`,
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
-      reddit: `https://reddit.com/submit?url=${url}&title=${title}`,
+      reddit: `https://reddit.com/submit?url=${url}&title=${shareTitle}`,
     };
-    if (shareUrls[platform]) window.open(shareUrls[platform], "_blank", "width=600,height=400");
+    if (shareUrls[platform]) {
+      window.open(shareUrls[platform], "_blank", "width=600,height=400");
+    }
   };
 
   const handleSubmitComment = async (e: React.FormEvent) => {
@@ -647,13 +500,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
 
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDragEnd={handleDragEnd}
-        >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
           <div className="space-y-3 mb-6">
             {userTiers.map((tier) => (
               <div key={tier.id} className="card-cartoon overflow-hidden !rounded-2xl">
@@ -662,11 +509,11 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
                     {tier.name}
                   </div>
                   <SortableContext items={tier.items.map((i) => i.id)} strategy={rectSortingStrategy}>
-                    <DroppableTier tier={tier}>
-                      {tier.items.map((item) => (
-                        <SortableItem key={item.id} item={item} isDragging={activeItem?.id === item.id} />
+                    <ViewDroppableTier tier={tier}>
+                      {tier.items.map((tierItem) => (
+                        <SimpleSortableItem key={tierItem.id} item={tierItem} isDragging={activeItem?.id === tierItem.id} />
                       ))}
-                    </DroppableTier>
+                    </ViewDroppableTier>
                   </SortableContext>
                 </div>
               </div>
@@ -689,21 +536,19 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
                     {isSaving ? "Saving..." : "Save my ranking"}
                   </button>
                 )}
-                {!isSignedIn && placedItems > 0 && (
-                  <span className="text-xs text-zinc-400">Sign in to save</span>
-                )}
+                {!isSignedIn && placedItems > 0 && <span className="text-xs text-zinc-400">Sign in to save</span>}
               </div>
             </div>
             <SortableContext items={unplacedItems.map((i) => i.id)} strategy={rectSortingStrategy}>
-              <DroppablePool>
+              <ViewDroppablePool>
                 {unplacedItems.length === 0 ? (
                   <p className="text-zinc-500 text-sm">All items have been placed!</p>
                 ) : (
-                  unplacedItems.map((item) => (
-                    <SortableItem key={item.id} item={item} isDragging={activeItem?.id === item.id} />
+                  unplacedItems.map((poolItem) => (
+                    <SimpleSortableItem key={poolItem.id} item={poolItem} isDragging={activeItem?.id === poolItem.id} />
                   ))
                 )}
-              </DroppablePool>
+              </ViewDroppablePool>
             </SortableContext>
           </div>
 
@@ -717,19 +562,11 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
         </DndContext>
 
         <div className="card-cartoon p-6">
-          <h2 className="text-2xl font-black mb-4 text-zinc-900">
-            Comments ({tierlist.comments.length})
-          </h2>
+          <h2 className="text-2xl font-black mb-4 text-zinc-900">Comments ({tierlist.comments.length})</h2>
 
           {isSignedIn ? (
             <form onSubmit={handleSubmitComment} className="mb-6">
-              <textarea
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="Add a comment..."
-                className="input-cartoon w-full mb-3"
-                rows={3}
-              />
+              <textarea value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Add a comment..." className="input-cartoon w-full mb-3" rows={3} />
               <button type="submit" disabled={isSubmittingComment || !newComment.trim()} className="btn-cartoon btn-blue">
                 {isSubmittingComment ? "Posting..." : "Post Comment"}
               </button>
