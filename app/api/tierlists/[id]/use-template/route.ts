@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { validateRequest } from "@/lib/auth";
 import { db } from "@/lib/db";
 
 export async function POST(
@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
+    const { user } = await validateRequest();
     const { id } = await params;
 
     const original = await db.tierList.findUnique({
@@ -42,8 +42,8 @@ export async function POST(
         description: original.description,
         coverImageUrl: original.coverImageUrl,
         isPublic: false,
-        userId: userId || null,
-        anonymousId: userId ? null : `anon-${crypto.randomUUID()}`,
+        userId: user?.id || null,
+        anonymousId: user ? null : `anon-${crypto.randomUUID()}`,
       },
     });
 

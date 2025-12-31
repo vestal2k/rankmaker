@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Nunito, Nunito_Sans } from "next/font/google";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ClerkProviderWithTheme } from "@/components/clerk-provider-with-theme";
+import { AuthProvider } from "@/components/auth-provider";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -83,12 +83,12 @@ export default function RootLayout({
           forcedTheme="light"
           disableTransitionOnChange
         >
-          <ClerkProviderWithTheme>
+          <AuthProvider>
             <Header />
             <main>
               {children}
             </main>
-          </ClerkProviderWithTheme>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

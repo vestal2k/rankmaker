@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { validateRequest } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
@@ -56,7 +56,7 @@ export async function GET(
       );
     }
 
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
 
     if (!tierlist.isPublic) {
       if (tierlist.anonymousId) {
@@ -64,14 +64,6 @@ export async function GET(
           return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
       } else if (tierlist.userId) {
-        if (!clerkId) {
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-
-        const user = await db.user.findUnique({
-          where: { clerkId },
-        });
-
         if (!user || user.id !== tierlist.userId) {
           return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
@@ -93,7 +85,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
     const { id } = await params;
     const body = await request.json();
     const { title, description, coverImageUrl, isPublic, tiers, anonymousId } = body;
@@ -121,14 +113,6 @@ export async function PUT(
         );
       }
     } else if (existingTierlist.userId) {
-      if (!clerkId) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-
-      const user = await db.user.findUnique({
-        where: { clerkId },
-      });
-
       if (!user || user.id !== existingTierlist.userId) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
@@ -192,7 +176,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
     const { id } = await params;
     const anonymousId = request.headers.get("x-anonymous-id");
 
@@ -212,14 +196,6 @@ export async function DELETE(
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     } else if (tierlist.userId) {
-      if (!clerkId) {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-
-      const user = await db.user.findUnique({
-        where: { clerkId },
-      });
-
       if (!user || user.id !== tierlist.userId) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }

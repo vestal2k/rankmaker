@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { validateRequest } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
@@ -7,7 +7,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
     const { id } = await params;
     const { value, anonymousId } = await request.json();
 
@@ -26,15 +26,7 @@ export async function POST(
       return NextResponse.json({ error: "Tier list not found" }, { status: 404 });
     }
 
-    if (clerkId) {
-      const user = await db.user.findUnique({
-        where: { clerkId },
-      });
-
-      if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
+    if (user) {
       const existingVote = await db.vote.findUnique({
         where: {
           userId_tierListId: {
@@ -122,7 +114,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
     const { id } = await params;
     const { searchParams } = new URL(request.url);
     const anonymousId = searchParams.get("anonymousId");
@@ -138,22 +130,16 @@ export async function GET(
 
     let userVote = null;
 
-    if (clerkId) {
-      const user = await db.user.findUnique({
-        where: { clerkId },
-      });
-
-      if (user) {
-        const vote = await db.vote.findUnique({
-          where: {
-            userId_tierListId: {
-              userId: user.id,
-              tierListId: id,
-            },
+    if (user) {
+      const vote = await db.vote.findUnique({
+        where: {
+          userId_tierListId: {
+            userId: user.id,
+            tierListId: id,
           },
-        });
-        userVote = vote?.value ?? null;
-      }
+        },
+      });
+      userVote = vote?.value ?? null;
     } else if (anonymousId) {
       const vote = await db.vote.findFirst({
         where: {

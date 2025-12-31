@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useUser, SignInButton } from "@clerk/nextjs";
+import Link from "next/link";
+import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -73,7 +74,7 @@ const getAnonymousId = () => {
 function CreatePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isSignedIn } = useUser();
+  const { isSignedIn } = useAuth();
   const [anonymousId, setAnonymousId] = useState<string | null>(null);
   const [title, setTitle] = useState("My Tier List");
   const [description, setDescription] = useState("");
@@ -812,9 +813,9 @@ function CreatePageContent() {
               <div className="mt-4 card-cartoon-sm p-4 bg-[#E3F2FD]">
                 <p className="text-[#1565C0] font-bold mb-3">Sign in to publish your tier list publicly! You can still save it privately without an account.</p>
                 <div className="flex gap-2 flex-wrap">
-                  <SignInButton mode="modal">
+                  <Link href="/sign-in">
                     <button className="btn-cartoon btn-blue">Sign In</button>
-                  </SignInButton>
+                  </Link>
                   <button className="btn-cartoon btn-white" onClick={() => { setShowAuthPrompt(false); setIsPublic(false); setTimeout(() => handleSave(), 100); }}>
                     Save as Private
                   </button>

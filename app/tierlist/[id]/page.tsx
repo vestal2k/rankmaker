@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
 import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Bookmark, Link2, ArrowLeft, Loader2, Save, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -69,7 +69,7 @@ function getAnonymousId(): string {
 export default function TierListPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const { user, isSignedIn } = useUser();
+  const { user, isSignedIn } = useAuth();
   const [tierlist, setTierlist] = useState<TierListDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userVote, setUserVote] = useState<number | null>(null);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
@@ -40,7 +40,7 @@ export default function ProfilePage({
   params: Promise<{ username: string }>;
 }) {
   const resolvedParams = use(params);
-  const { user: currentUser } = useUser();
+  const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 

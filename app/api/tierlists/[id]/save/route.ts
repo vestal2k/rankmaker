@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { validateRequest } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
@@ -7,16 +7,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
     const { id } = await params;
-
-    if (!clerkId) {
-      return NextResponse.json({ isSaved: false });
-    }
-
-    const user = await db.user.findUnique({
-      where: { clerkId },
-    });
 
     if (!user) {
       return NextResponse.json({ isSaved: false });
@@ -43,21 +35,13 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
 
-    if (!clerkId) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
-
-    const user = await db.user.findUnique({
-      where: { clerkId },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
 
     const tierList = await db.tierList.findUnique({
       where: { id },
@@ -105,21 +89,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
 
-    if (!clerkId) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { id } = await params;
-
-    const user = await db.user.findUnique({
-      where: { clerkId },
-    });
-
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
 
     await db.savedTierList.delete({
       where: {

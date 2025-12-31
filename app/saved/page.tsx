@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
@@ -27,17 +27,17 @@ interface SavedTierListPreview {
 }
 
 export default function SavedPage() {
-  const { isSignedIn, isLoaded } = useUser();
+  const { isSignedIn, isLoading: isAuthLoading } = useAuth();
   const [tierlists, setTierlists] = useState<SavedTierListPreview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isLoaded && isSignedIn) {
+    if (!isAuthLoading && isSignedIn) {
       loadSavedTierLists();
-    } else if (isLoaded && !isSignedIn) {
+    } else if (!isAuthLoading && !isSignedIn) {
       setIsLoading(false);
     }
-  }, [isLoaded, isSignedIn]);
+  }, [isAuthLoading, isSignedIn]);
 
   const loadSavedTierLists = async () => {
     try {
@@ -52,7 +52,7 @@ export default function SavedPage() {
     }
   };
 
-  if (!isLoaded || isLoading) {
+  if (isAuthLoading || isLoading) {
     return (
       <div className="min-h-screen py-12 relative overflow-hidden">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">

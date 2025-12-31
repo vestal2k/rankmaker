@@ -2,13 +2,25 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { UserButton, SignInButton, useUser } from "@clerk/nextjs";
-import { Compass, FolderHeart, PlusCircle, LayoutGrid, Menu, X } from "lucide-react";
+import { useAuth } from "@/components/auth-provider";
+import { Compass, FolderHeart, PlusCircle, LayoutGrid, Menu, X, LogOut, User } from "lucide-react";
 import { useState } from "react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Header() {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.href = "/";
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-4">
@@ -60,13 +72,32 @@ export function Header() {
 
           <div className="flex items-center gap-3">
             {isSignedIn ? (
-              <UserButton afterSignOutUrl="/" />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold border-2 border-zinc-900 shadow-[2px_2px_0_#1a1a1a] hover:shadow-[3px_3px_0_#1a1a1a] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all">
+                    {user?.username?.charAt(0).toUpperCase() || "U"}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem asChild>
+                    <Link href={`/profile/${user?.username}`} className="flex items-center gap-2 cursor-pointer">
+                      <User className="w-4 h-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} className="flex items-center gap-2 cursor-pointer text-red-600">
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <SignInButton mode="modal">
+              <Link href="/sign-in">
                 <button className="btn-cartoon btn-coral flex items-center gap-2 !py-2 !px-5 text-sm">
                   Sign In
                 </button>
-              </SignInButton>
+              </Link>
             )}
 
             <button

@@ -1,21 +1,13 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { validateRequest } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
 export async function GET(request: NextRequest) {
   try {
-    const { userId: clerkId } = await auth();
+    const { user } = await validateRequest();
     const anonymousId = request.headers.get("x-anonymous-id");
 
-    if (clerkId) {
-      const user = await db.user.findUnique({
-        where: { clerkId },
-      });
-
-      if (!user) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
+    if (user) {
       const tierlists = await db.tierList.findMany({
         where: { userId: user.id },
         include: {
@@ -67,8 +59,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId: clerkId } = await auth();
-    const clerkUser = await currentUser();
+    const { user } = await validateRequest();
 
     const body = await request.json();
     const { title, description, coverImageUrl, isPublic, tiers, anonymousId } = body;
@@ -80,33 +71,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (isPublic && !clerkId) {
+    if (isPublic && !user) {
       return NextResponse.json(
         { error: "Authentication required to publish public tier lists" },
         { status: 401 }
       );
     }
 
-    if (clerkId && clerkUser) {
-      let user = await db.user.findUnique({
-        where: { clerkId },
-      });
-
-      if (!user) {
-        user = await db.user.create({
-          data: {
-            clerkId,
-            username:
-              clerkUser.username ||
-              clerkUser.emailAddresses[0]?.emailAddress.split("@")[0] ||
-              `user_${clerkId}`,
-            email:
-              clerkUser.emailAddresses[0]?.emailAddress || `${clerkId}@temp.com`,
-            imageUrl: clerkUser.imageUrl,
-          },
-        });
-      }
-
+    if (user) {
       const tierlist = await db.tierList.create({
         data: {
           title,
