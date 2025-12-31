@@ -105,10 +105,8 @@ export default function ProfilePage({
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
-      {/* Profile Header */}
       <Card className="p-6 md:p-8 mb-8 border-2">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-          {/* Avatar */}
           <div className="relative">
             {profile.imageUrl ? (
               <img
@@ -123,7 +121,6 @@ export default function ProfilePage({
             )}
           </div>
 
-          {/* Info */}
           <div className="flex-1 text-center md:text-left">
             <h1 className="text-3xl font-bold mb-2">{profile.username}</h1>
             <div className="flex items-center justify-center md:justify-start gap-2 text-muted-foreground mb-4">
@@ -131,7 +128,6 @@ export default function ProfilePage({
               <span>Member since {new Date(profile.createdAt).toLocaleDateString()}</span>
             </div>
 
-            {/* Stats */}
             <div className="flex items-center justify-center md:justify-start gap-6">
               <div className="text-center">
                 <div className="text-2xl font-bold text-violet-600 dark:text-violet-400">
@@ -156,7 +152,6 @@ export default function ProfilePage({
         </div>
       </Card>
 
-      {/* User's Tier Lists */}
       <div className="flex items-center gap-3 mb-6">
         <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-purple-500 rounded-lg flex items-center justify-center">
           <LayoutGrid className="w-4 h-4 text-white" />

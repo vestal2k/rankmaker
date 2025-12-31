@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// GET /api/tierlists/top - Get top tier lists by vote score
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -25,7 +24,6 @@ export async function GET(request: Request) {
       },
     });
 
-    // Calculate vote score and sort by it
     const tierlistsWithScore = tierlists
       .map((tierlist) => ({
         ...tierlist,

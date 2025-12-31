@@ -2,7 +2,6 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// GET /api/tierlists/[id]/save - Check if current user has saved this tier list
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -39,7 +38,6 @@ export async function GET(
   }
 }
 
-// POST /api/tierlists/[id]/save - Save a tier list
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -53,7 +51,6 @@ export async function POST(
 
     const { id } = await params;
 
-    // Find user in database
     const user = await db.user.findUnique({
       where: { clerkId },
     });
@@ -62,7 +59,6 @@ export async function POST(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Check if tierlist exists
     const tierList = await db.tierList.findUnique({
       where: { id },
     });
@@ -71,7 +67,6 @@ export async function POST(
       return NextResponse.json({ error: "Tier list not found" }, { status: 404 });
     }
 
-    // Check if already saved
     const existingSave = await db.savedTierList.findUnique({
       where: {
         userId_tierListId: {
@@ -88,7 +83,6 @@ export async function POST(
       );
     }
 
-    // Create save
     await db.savedTierList.create({
       data: {
         userId: user.id,
@@ -106,7 +100,6 @@ export async function POST(
   }
 }
 
-// DELETE /api/tierlists/[id]/save - Unsave a tier list
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -120,7 +113,6 @@ export async function DELETE(
 
     const { id } = await params;
 
-    // Find user in database
     const user = await db.user.findUnique({
       where: { clerkId },
     });
@@ -129,7 +121,6 @@ export async function DELETE(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Delete save
     await db.savedTierList.delete({
       where: {
         userId_tierListId: {

@@ -2,7 +2,6 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// POST /api/tierlists/[id]/comments - Create a comment
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -26,7 +25,6 @@ export async function POST(
       );
     }
 
-    // Find or create user in database
     let user = await db.user.findUnique({
       where: { clerkId },
     });
@@ -46,7 +44,6 @@ export async function POST(
       });
     }
 
-    // Create comment
     const comment = await db.comment.create({
       data: {
         content: content.trim(),

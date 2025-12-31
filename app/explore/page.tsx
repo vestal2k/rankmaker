@@ -46,7 +46,6 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen pt-28 pb-12 px-4">
       <div className="container mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-10 flex-wrap">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-[#4DABF7] rounded-2xl flex items-center justify-center border-3 border-zinc-900 shadow-hard">

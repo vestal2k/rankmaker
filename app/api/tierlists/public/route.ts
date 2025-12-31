@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// GET /api/tierlists/public - Get all public tier lists
 export async function GET() {
   try {
     const tierlists = await db.tierList.findMany({
@@ -21,14 +20,13 @@ export async function GET() {
         },
       },
       orderBy: { createdAt: "desc" },
-      take: 50, // Limit to 50 most recent
+      take: 50,
     });
 
-    // Calculate vote score for each tierlist
     const tierlistsWithScore = tierlists.map((tierlist) => ({
       ...tierlist,
       voteScore: tierlist.votes.reduce((sum, vote) => sum + vote.value, 0),
-      votes: undefined, // Remove raw votes from response
+      votes: undefined,
     }));
 
     return NextResponse.json(tierlistsWithScore);

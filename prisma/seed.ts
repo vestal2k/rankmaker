@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-// Load env FIRST before any other imports
 const dotenv = require("dotenv");
 dotenv.config({ override: true });
 
-// Use standard pg Pool for CLI seeding (not edge runtime)
 const { PrismaClient } = require("@prisma/client");
 const { Pool } = require("pg");
 const { PrismaPg } = require("@prisma/adapter-pg");

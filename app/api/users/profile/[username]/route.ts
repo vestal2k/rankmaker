@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// GET /api/users/profile/[username] - Get user profile with tier lists
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ username: string }> }
@@ -43,7 +42,6 @@ export async function GET(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Calculate vote scores for each tierlist and total stats
     let totalVoteScore = 0;
     let totalComments = 0;
 

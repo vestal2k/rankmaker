@@ -2,7 +2,6 @@ import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// GET /api/users/saved - Get all saved tier lists for current user
 export async function GET() {
   try {
     const { userId: clerkId } = await auth();
@@ -42,7 +41,6 @@ export async function GET() {
       orderBy: { createdAt: "desc" },
     });
 
-    // Transform to include vote score
     const tierlistsWithScore = savedTierLists.map((saved) => ({
       ...saved.tierList,
       savedAt: saved.createdAt,

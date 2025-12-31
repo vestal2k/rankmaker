@@ -2,13 +2,11 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-// GET /api/tierlists - List all tier lists for the current user
 export async function GET(request: NextRequest) {
   try {
     const { userId: clerkId } = await auth();
     const anonymousId = request.headers.get("x-anonymous-id");
 
-    // If authenticated, get user's tierlists
     if (clerkId) {
       const user = await db.user.findUnique({
         where: { clerkId },
@@ -37,7 +35,6 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(tierlists);
     }
 
-    // If not authenticated but has anonymousId, get anonymous tierlists
     if (anonymousId) {
       const tierlists = await db.tierList.findMany({
         where: { anonymousId },
@@ -68,7 +65,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/tierlists - Create a new tier list
 export async function POST(request: NextRequest) {
   try {
     const { userId: clerkId } = await auth();
@@ -84,7 +80,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Public tierlists require authentication
     if (isPublic && !clerkId) {
       return NextResponse.json(
         { error: "Authentication required to publish public tier lists" },
@@ -92,7 +87,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // If authenticated, create with user
     if (clerkId && clerkUser) {
       let user = await db.user.findUnique({
         where: { clerkId },
@@ -151,7 +145,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(tierlist, { status: 201 });
     }
 
-    // Anonymous user - create private tierlist with anonymousId
     if (!anonymousId) {
       return NextResponse.json(
         { error: "Anonymous ID is required for unauthenticated users" },
@@ -164,7 +157,7 @@ export async function POST(request: NextRequest) {
         title,
         description: description || null,
         coverImageUrl: coverImageUrl || null,
-        isPublic: false, // Always private for anonymous users
+        isPublic: false,
         anonymousId,
         tiers: {
           create: tiers.map((tier: any, index: number) => ({

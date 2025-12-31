@@ -122,7 +122,6 @@ export default function SavedPage() {
 
   return (
     <div className="min-h-screen py-12 relative overflow-hidden">
-      {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-gradient-to-br from-pink-400/20 to-rose-400/20 rounded-full blur-3xl animate-blob" />
         <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-orange-400/20 to-pink-400/20 rounded-full blur-3xl animate-blob animate-delay-300" />
@@ -130,7 +129,6 @@ export default function SavedPage() {
       </div>
 
       <div className="container mx-auto px-4 relative">
-        {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-10 flex-wrap">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center shadow-pink animate-bounce-playful">
