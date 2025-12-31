@@ -95,7 +95,7 @@ export default function ExplorePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tierlists.map((tierlist) => (
               <Link key={tierlist.id} href={`/tierlist/${tierlist.id}`}>
-                <div className="card-cartoon overflow-hidden cursor-pointer">
+                <div className="card-cartoon card-cartoon-hover overflow-hidden cursor-pointer">
                   {tierlist.coverImageUrl ? (
                     <div className="w-full h-40 overflow-hidden">
                       <img

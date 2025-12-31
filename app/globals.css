@@ -511,3 +511,32 @@ html {
   @apply h-full bg-[#51CF66] rounded-full;
   transition: width 0.3s ease;
 }
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(45 40% 93%);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1a1a1a;
+  border-radius: 6px;
+  border: 3px solid hsl(45 40% 93%);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #333;
+}
+
+::-webkit-scrollbar-corner {
+  background: hsl(45 40% 93%);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #1a1a1a hsl(45 40% 93%);
+}

@@ -120,7 +120,7 @@ export default function CategoriesPage() {
                 key={category.name}
                 href={`/explore?category=${category.name.toLowerCase().replace(" ", "-")}`}
               >
-                <div className="card-cartoon p-6 h-full">
+                <div className="card-cartoon card-cartoon-hover p-6 h-full cursor-pointer">
                   <div className="flex items-start gap-4">
                     <button className={`btn-cartoon ${category.color} !p-3 flex-shrink-0`}>
                       <Icon className="w-7 h-7" />
@@ -129,7 +129,7 @@ export default function CategoriesPage() {
                       <h3 className="font-bold text-lg mb-1 text-zinc-900">
                         {category.name}
                       </h3>
-                      <p className="text-sm text-zinc-700">
+                      <p className="text-sm text-zinc-700 line-clamp-2">
                         {category.description}
                       </p>
                     </div>
