@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useUser, SignInButton } from "@clerk/nextjs";
-import { upload } from "@vercel/blob/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -70,15 +69,6 @@ const getAnonymousId = () => {
   return anonymousId;
 };
 
-function getMediaTypeFromFile(file: File): MediaType {
-  const mimeType = file.type.toLowerCase();
-  const fileName = file.name.toLowerCase();
-
-  if (mimeType === "image/gif" || fileName.endsWith(".gif")) return "GIF";
-  if (mimeType.startsWith("video/")) return "VIDEO";
-  if (mimeType.startsWith("audio/")) return "AUDIO";
-  return "IMAGE";
-}
 
 function CreatePageContent() {
   const router = useRouter();
@@ -336,50 +326,18 @@ function CreatePageContent() {
     if (!files) return;
 
     try {
-      const fileArray = Array.from(files);
-      const smallFiles: File[] = [];
-      const largeFiles: File[] = [];
+      const formData = new FormData();
+      Array.from(files).forEach((file) => formData.append("files", file));
 
-      for (const file of fileArray) {
-        const isLargeOrMedia = file.size > 4 * 1024 * 1024 || file.type.startsWith("video/") || file.type.startsWith("audio/");
-        if (isLargeOrMedia) {
-          largeFiles.push(file);
-        } else {
-          smallFiles.push(file);
-        }
-      }
+      const response = await fetch("/api/upload", { method: "POST", body: formData });
+      if (!response.ok) throw new Error("Failed to upload media");
 
-      const newItems: TierItem[] = [];
-
-      if (smallFiles.length > 0) {
-        const formData = new FormData();
-        smallFiles.forEach((file) => formData.append("files", file));
-
-        const response = await fetch("/api/upload", { method: "POST", body: formData });
-        if (!response.ok) throw new Error("Failed to upload media");
-
-        const data = await response.json();
-        data.files.forEach((file: { url: string; mediaType: MediaType }) => {
-          newItems.push({
-            id: `item-${Date.now()}-${Math.random()}`,
-            mediaUrl: file.url,
-            mediaType: file.mediaType,
-          });
-        });
-      }
-
-      for (const file of largeFiles) {
-        const blob = await upload(file.name, file, {
-          access: "public",
-          handleUploadUrl: "/api/upload/client-token",
-        });
-
-        newItems.push({
-          id: `item-${Date.now()}-${Math.random()}`,
-          mediaUrl: blob.url,
-          mediaType: getMediaTypeFromFile(file),
-        });
-      }
+      const data = await response.json();
+      const newItems: TierItem[] = data.files.map((file: { url: string; mediaType: MediaType }) => ({
+        id: `item-${Date.now()}-${Math.random()}`,
+        mediaUrl: file.url,
+        mediaType: file.mediaType,
+      }));
 
       setUnplacedItems((prev) => [...prev, ...newItems]);
     } catch (error) {
