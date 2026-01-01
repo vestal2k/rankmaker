@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+export const revalidate = 3600;
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -33,7 +35,11 @@ export async function GET(request: Request) {
       .sort((a, b) => b.voteScore - a.voteScore)
       .slice(0, limit);
 
-    return NextResponse.json(tierlistsWithScore);
+    return NextResponse.json(tierlistsWithScore, {
+      headers: {
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    });
   } catch (error) {
     console.error("Error fetching top tier lists:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

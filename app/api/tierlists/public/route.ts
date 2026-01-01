@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
+export const revalidate = 1800;
+
 export async function GET() {
   try {
     const tierlists = await db.tierList.findMany({
@@ -29,7 +31,11 @@ export async function GET() {
       votes: undefined,
     }));
 
-    return NextResponse.json(tierlistsWithScore);
+    return NextResponse.json(tierlistsWithScore, {
+      headers: {
+        "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600",
+      },
+    });
   } catch (error) {
     console.error("Error fetching public tier lists:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
