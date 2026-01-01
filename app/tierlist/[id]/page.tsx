@@ -553,10 +553,10 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
             </SortableContext>
           </div>
 
-          <DragOverlay>
+          <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.25, 1, 0.5, 1)" }}>
             {activeItem && (
-              <div className="w-16 h-16 opacity-80">
-                <MediaPreview item={activeItem} className="border-2 border-zinc-900 shadow-lg" />
+              <div className="w-16 h-16 animate-in zoom-in-95 duration-150">
+                <MediaPreview item={activeItem} className="border-2 border-primary shadow-xl ring-2 ring-primary/30" />
               </div>
             )}
           </DragOverlay>

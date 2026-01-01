@@ -17,8 +17,8 @@ export function DroppableTierZone({ tier, children, isOver }: DroppableTierZoneP
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 min-h-[80px] p-2 flex flex-wrap gap-2 items-start content-start transition-colors ${
-        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset" : "bg-secondary/20"
+      className={`flex-1 min-h-[80px] p-2 flex flex-wrap gap-2 items-start content-start transition-all duration-200 ease-out ${
+        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset scale-[1.01]" : "bg-secondary/20"
       }`}
     >
       {children}
@@ -39,8 +39,8 @@ export function DroppablePoolZone({ children, isOver }: DroppablePoolZoneProps) 
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-wrap gap-2 min-h-[80px] p-2 rounded transition-colors ${
-        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset" : ""
+      className={`flex flex-wrap gap-2 min-h-[80px] p-2 rounded-lg transition-all duration-200 ease-out ${
+        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset scale-[1.005]" : "bg-secondary/10"
       }`}
     >
       {children}
@@ -59,8 +59,8 @@ export function ViewDroppableTier({ tier, children }: ViewDroppableTierProps) {
   return (
     <div
       ref={setNodeRef}
-      className={`flex-1 min-h-[80px] p-2 flex flex-wrap gap-2 items-start content-start transition-colors ${
-        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset" : "bg-secondary/20"
+      className={`flex-1 min-h-[80px] p-2 flex flex-wrap gap-2 items-start content-start transition-all duration-200 ease-out ${
+        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset scale-[1.01]" : "bg-secondary/20"
       }`}
     >
       {children}
@@ -78,8 +78,8 @@ export function ViewDroppablePool({ children }: ViewDroppablePoolProps) {
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-wrap gap-2 min-h-[80px] p-2 rounded transition-colors ${
-        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset" : ""
+      className={`flex flex-wrap gap-2 min-h-[80px] p-2 rounded-lg transition-all duration-200 ease-out ${
+        isOver ? "bg-primary/20 ring-2 ring-primary ring-inset scale-[1.005]" : "bg-secondary/10"
       }`}
     >
       {children}

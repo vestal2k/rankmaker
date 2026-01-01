@@ -152,6 +152,22 @@
 .animate-delay-400 { animation-delay: 400ms; }
 .animate-delay-500 { animation-delay: 500ms; }
 
+/* Smooth item transitions for drag & drop */
+@keyframes item-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-item-appear {
+  animation: item-appear 0.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
 /* ========================================
    PLAYFUL HOVER EFFECTS
    ======================================== */
@@ -173,7 +189,8 @@
   @apply relative bg-white rounded-3xl;
   border: 4px solid #1a1a1a;
   box-shadow: 6px 6px 0 #1a1a1a;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .card-cartoon-hover:hover {
@@ -184,6 +201,7 @@
 .card-cartoon-hover:active {
   transform: translate(2px, 2px);
   box-shadow: 4px 4px 0 #1a1a1a;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .card-cartoon-sm {
@@ -200,7 +218,9 @@
   @apply relative font-bold rounded-full px-6 py-3;
   border: 3px solid #1a1a1a;
   box-shadow: 4px 4px 0 #1a1a1a;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              background-color 0.15s ease;
 }
 
 .btn-cartoon:hover {
@@ -211,6 +231,7 @@
 .btn-cartoon:active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 #1a1a1a;
+  transition: transform 0.05s ease, box-shadow 0.05s ease;
 }
 
 .btn-cartoon:disabled {

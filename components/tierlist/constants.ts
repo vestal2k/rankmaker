@@ -94,4 +94,4 @@ export const ITEM_SIZE = {
   height: 64,
 } as const;
 
-export const DRAG_ACTIVATION_DISTANCE = 8;
+export const DRAG_ACTIVATION_DISTANCE = 5;

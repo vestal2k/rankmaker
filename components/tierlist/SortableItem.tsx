@@ -31,8 +31,9 @@ export function SortableItem({
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging || externalIsDragging ? 0.5 : 1,
+    transition: transition || "transform 150ms cubic-bezier(0.25, 1, 0.5, 1)",
+    opacity: isDragging || externalIsDragging ? 0.4 : 1,
+    scale: isDragging ? "1.05" : "1",
   };
 
   const handleClick = (e: React.MouseEvent) => {
@@ -57,23 +58,23 @@ export function SortableItem({
       ref={setNodeRef}
       style={style}
       {...attributes}
-      className="w-16 h-16 relative group"
+      className={`w-16 h-16 relative group transition-shadow duration-150 ${isDragging ? "z-50 shadow-xl" : ""}`}
     >
       <div
         {...listeners}
-        className="w-full h-full cursor-move"
+        className="w-full h-full cursor-grab active:cursor-grabbing"
         onClick={handleClick}
       >
         <MediaPreview
           item={item}
-          className="border-2 border-transparent hover:border-primary"
+          className={`border-2 transition-all duration-150 ${isDragging ? "border-primary shadow-lg" : "border-transparent hover:border-primary/50"}`}
         />
       </div>
       {showDeleteButton && onDelete && (
         <button
           onClick={handleDelete}
           onPointerDown={handlePointerDown}
-          className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs font-bold z-10"
+          className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-all duration-150 flex items-center justify-center text-xs font-bold z-10 hover:scale-110"
         >
           ×
         </button>
@@ -90,10 +91,13 @@ interface SimpleSortableItemProps {
 export function SimpleSortableItem({ item, isDragging }: SimpleSortableItemProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging: internalIsDragging } = useSortable({ id: item.id });
 
+  const isCurrentlyDragging = isDragging || internalIsDragging;
+
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging || internalIsDragging ? 0.5 : 1,
+    transition: transition || "transform 150ms cubic-bezier(0.25, 1, 0.5, 1)",
+    opacity: isCurrentlyDragging ? 0.4 : 1,
+    scale: isCurrentlyDragging ? "1.05" : "1",
   };
 
   return (
@@ -102,9 +106,12 @@ export function SimpleSortableItem({ item, isDragging }: SimpleSortableItemProps
       style={style}
       {...attributes}
       {...listeners}
-      className="w-16 h-16 cursor-move"
+      className={`w-16 h-16 cursor-grab active:cursor-grabbing transition-shadow duration-150 ${isCurrentlyDragging ? "z-50 shadow-xl" : ""}`}
     >
-      <MediaPreview item={item} className="border-2 border-transparent hover:border-primary" />
+      <MediaPreview
+        item={item}
+        className={`border-2 transition-all duration-150 ${isCurrentlyDragging ? "border-primary shadow-lg" : "border-transparent hover:border-primary/50"}`}
+      />
     </div>
   );
 }
