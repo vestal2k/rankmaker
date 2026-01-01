@@ -506,7 +506,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
             {userTiers.map((tier) => (
               <div key={tier.id} className="card-cartoon overflow-hidden !rounded-2xl">
                 <div className="flex">
-                  <div className="w-24 flex items-center justify-center font-black text-lg shrink-0 p-3 break-words text-center" style={{ backgroundColor: tier.color, color: getContrastColor(tier.color) }}>
+                  <div className="min-w-24 max-w-48 flex items-center justify-center font-bold text-lg shrink-0 p-2 break-words text-center" style={{ backgroundColor: tier.color, color: getContrastColor(tier.color) }}>
                     {tier.name}
                   </div>
                   <SortableContext items={tier.items.map((i) => i.id)} strategy={rectSortingStrategy}>
@@ -521,9 +521,9 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
             ))}
           </div>
 
-          <div className="card-cartoon overflow-hidden !rounded-2xl mb-6">
-            <div className="bg-zinc-800 text-white px-4 py-2 font-bold flex items-center justify-between">
-              <span>Items ({placedItems}/{totalItems} placed)</span>
+          <div className="card-cartoon p-6 mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-black text-zinc-900">Pool ({placedItems}/{totalItems} placed)</h3>
               <div className="flex items-center gap-2">
                 {hasChanges && (
                   <button onClick={handleReset} className="btn-cartoon btn-white !py-1 !px-3 !text-sm flex items-center gap-1">

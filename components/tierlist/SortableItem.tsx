@@ -88,12 +88,12 @@ interface SimpleSortableItemProps {
 }
 
 export function SimpleSortableItem({ item, isDragging }: SimpleSortableItemProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging: internalIsDragging } = useSortable({ id: item.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging || internalIsDragging ? 0.5 : 1,
   };
 
   return (
@@ -102,9 +102,9 @@ export function SimpleSortableItem({ item, isDragging }: SimpleSortableItemProps
       style={style}
       {...attributes}
       {...listeners}
-      className="w-16 h-16 cursor-grab active:cursor-grabbing touch-none"
+      className="w-16 h-16 cursor-move"
     >
-      <MediaPreview item={item} className="border-2 border-zinc-900" />
+      <MediaPreview item={item} className="border-2 border-transparent hover:border-primary" />
     </div>
   );
 }
