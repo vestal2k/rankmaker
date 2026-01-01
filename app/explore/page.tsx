@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowBigUp, MessageCircle, Compass, Zap, Loader2, Search } from "lucide-react";
+import { ArrowBigUp, MessageCircle, Compass, Zap, Loader2, Search, X } from "lucide-react";
 
 interface TierListPreview {
   id: string;
@@ -22,17 +23,38 @@ interface TierListPreview {
   };
 }
 
+const CATEGORY_LABELS: Record<string, string> = {
+  "games": "Games",
+  "movies": "Movies",
+  "tv-shows": "TV Shows",
+  "music": "Music",
+  "food": "Food",
+  "sports": "Sports",
+  "anime": "Anime",
+  "books": "Books",
+  "cars": "Cars",
+  "travel": "Travel",
+  "lifestyle": "Lifestyle",
+  "other": "Other",
+};
+
 export default function ExplorePage() {
+  const searchParams = useSearchParams();
+  const category = searchParams.get("category");
   const [tierlists, setTierlists] = useState<TierListPreview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     loadTierLists();
-  }, []);
+  }, [category]);
 
   const loadTierLists = async () => {
     try {
-      const response = await fetch("/api/tierlists/public");
+      setIsLoading(true);
+      const url = category
+        ? `/api/tierlists/public?category=${category}`
+        : "/api/tierlists/public";
+      const response = await fetch(url);
       if (!response.ok) throw new Error("Failed to load tier lists");
       const data = await response.json();
       setTierlists(data);
@@ -46,24 +68,28 @@ export default function ExplorePage() {
   return (
     <div className="min-h-screen pt-28 pb-12 px-4">
       <div className="container mx-auto">
-        <div className="flex items-center justify-between gap-4 mb-10 flex-wrap">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-[#4DABF7] rounded-2xl flex items-center justify-center border-3 border-zinc-900 shadow-hard">
-              <Compass className="w-7 h-7 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-zinc-900">
-                Explore
-              </h1>
-              <p className="text-zinc-700 font-medium">Discover tier list templates to rank yourself</p>
-            </div>
+        <div className="flex items-center gap-4 mb-10">
+          <div className="w-14 h-14 bg-[#4DABF7] rounded-2xl flex items-center justify-center border-3 border-zinc-900 shadow-hard">
+            <Compass className="w-7 h-7 text-white" />
           </div>
-          <Link href="/create">
-            <button className="btn-cartoon btn-coral flex items-center gap-2">
-              <Zap className="w-5 h-5" />
-              Create New
-            </button>
-          </Link>
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black text-zinc-900">
+              {category ? CATEGORY_LABELS[category] || category : "Explore"}
+            </h1>
+            <p className="text-zinc-700 font-medium">
+              {category
+                ? `Tier lists in ${CATEGORY_LABELS[category] || category}`
+                : "Discover tier list templates to rank yourself"}
+            </p>
+          </div>
+          {category && (
+            <Link href="/explore" className="ml-auto">
+              <button className="btn-cartoon btn-white flex items-center gap-2 !py-2 !px-4 text-sm">
+                <X className="w-4 h-4" />
+                Clear filter
+              </button>
+            </Link>
+          )}
         </div>
 
         {isLoading ? (

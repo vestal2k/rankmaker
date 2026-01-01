@@ -1,12 +1,18 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
 export const revalidate = 1800;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
+
     const tierlists = await db.tierList.findMany({
-      where: { isPublic: true },
+      where: {
+        isPublic: true,
+        ...(category && { category: category.toLowerCase().replace("-", " ") }),
+      },
       include: {
         user: {
           select: {

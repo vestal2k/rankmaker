@@ -39,10 +39,11 @@ model TierList {
   title         String
   description   String?
   coverImageUrl String?
+  category      String?
   isPublic      Boolean  @default(true)
   userId        String?
   user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  anonymousId   String?  // For anonymous users (stored in localStorage)
+  anonymousId   String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -54,6 +55,7 @@ model TierList {
   @@index([userId])
   @@index([anonymousId])
   @@index([createdAt])
+  @@index([category])
 }
 
 model Tier {
