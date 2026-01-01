@@ -225,6 +225,12 @@
   box-shadow: 4px 4px 0 #1a1a1a;
 }
 
+.card-cartoon-hover .btn-cartoon:hover,
+.card-cartoon-hover .btn-cartoon:active {
+  transform: none;
+  box-shadow: 4px 4px 0 #1a1a1a;
+}
+
 .btn-coral {
   @apply bg-[#FF6B6B] text-white;
 }
