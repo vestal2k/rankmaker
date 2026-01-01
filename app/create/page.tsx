@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/components/auth-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -737,7 +738,7 @@ function CreatePageContent() {
                   <Label className="text-sm font-medium mb-2 block">Cover Image (optional)</Label>
                   {coverImageUrl ? (
                     <div className="relative w-full h-40 rounded-lg overflow-hidden border border-border">
-                      <img src={coverImageUrl} alt="Cover" className="w-full h-full object-cover" />
+                      <Image src={coverImageUrl} alt="Cover" fill sizes="100vw" className="object-cover" />
                       <Button size="icon" variant="destructive" className="absolute top-2 right-2 w-6 h-6" onClick={() => setCoverImageUrl(null)}>
                         <X className="w-4 h-4" />
                       </Button>

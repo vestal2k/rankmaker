@@ -109,9 +109,11 @@ export default function ProfilePage({
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
           <div className="relative">
             {profile.imageUrl ? (
-              <img
+              <Image
                 src={profile.imageUrl}
                 alt={profile.username}
+                width={128}
+                height={128}
                 className="w-24 h-24 md:w-32 md:h-32 rounded-full ring-4 ring-violet-200 dark:ring-violet-900"
               />
             ) : (
@@ -179,11 +181,13 @@ export default function ProfilePage({
             <Link key={tierlist.id} href={`/tierlist/${tierlist.id}`}>
               <Card className="overflow-hidden group hover:shadow-xl hover:shadow-violet-500/10 transition-all hover:-translate-y-1 border-2 hover:border-violet-200 dark:hover:border-violet-900 cursor-pointer">
                 {tierlist.coverImageUrl ? (
-                  <div className="w-full h-36 overflow-hidden bg-muted">
-                    <img
+                  <div className="w-full h-36 overflow-hidden bg-muted relative">
+                    <Image
                       src={tierlist.coverImageUrl}
                       alt={tierlist.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                 ) : (

@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useAuth } from "@/components/auth-provider";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowBigUp, ArrowBigDown, MessageCircle, Edit, Bookmark, Link2, ArrowLeft, Loader2, Save, RotateCcw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { getContrastColor } from "@/lib/utils";
@@ -426,8 +427,8 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
     <div className="min-h-screen bg-stripes pt-28 pb-12 px-4">
       <div className="container mx-auto max-w-5xl">
         {tierlist.coverImageUrl && (
-          <div className="mb-6 card-cartoon overflow-hidden">
-            <img src={tierlist.coverImageUrl} alt={tierlist.title} className="w-full h-48 md:h-64 object-cover" />
+          <div className="mb-6 card-cartoon overflow-hidden relative h-48 md:h-64">
+            <Image src={tierlist.coverImageUrl} alt={tierlist.title} fill sizes="(max-width: 1024px) 100vw, 1024px" className="object-cover" />
           </div>
         )}
 
@@ -448,7 +449,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
 
           <div className="flex items-center gap-4 mb-4">
             {tierlist.user?.imageUrl ? (
-              <img src={tierlist.user.imageUrl} alt={tierlist.user?.username || "User"} className="w-10 h-10 rounded-full border-2 border-zinc-900" />
+              <Image src={tierlist.user.imageUrl} alt={tierlist.user?.username || "User"} width={40} height={40} className="rounded-full border-2 border-zinc-900" />
             ) : (
               <div className="w-10 h-10 rounded-full bg-[#4DABF7] flex items-center justify-center text-white font-bold border-2 border-zinc-900">
                 {tierlist.user?.username?.charAt(0).toUpperCase() || "A"}
@@ -580,7 +581,7 @@ export default function TierListPage({ params }: { params: Promise<{ id: string 
               <div key={comment.id} className="card-cartoon-sm p-4">
                 <div className="flex items-start gap-3">
                   {comment.user.imageUrl ? (
-                    <img src={comment.user.imageUrl} alt={comment.user.username} className="w-8 h-8 rounded-full border-2 border-zinc-900" />
+                    <Image src={comment.user.imageUrl} alt={comment.user.username} width={32} height={32} className="rounded-full border-2 border-zinc-900" />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-[#4DABF7] flex items-center justify-center text-white font-bold border-2 border-zinc-900 text-sm">
                       {comment.user.username.charAt(0).toUpperCase()}

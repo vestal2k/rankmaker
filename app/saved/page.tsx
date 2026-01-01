@@ -179,11 +179,13 @@ export default function SavedPage() {
                   style={{ animationDelay: `${index * 50}ms` }}
                 >
                   {tierlist.coverImageUrl ? (
-                    <div className="w-full h-40 overflow-hidden bg-muted">
-                      <img
+                    <div className="w-full h-40 overflow-hidden bg-muted relative">
+                      <Image
                         src={tierlist.coverImageUrl}
                         alt={tierlist.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
                       />
                     </div>
                   ) : (
@@ -208,10 +210,12 @@ export default function SavedPage() {
                     )}
                     <div className="flex items-center gap-3 mb-4">
                       {tierlist.user.imageUrl ? (
-                        <img
+                        <Image
                           src={tierlist.user.imageUrl}
                           alt={tierlist.user.username}
-                          className="w-8 h-8 rounded-full ring-2 ring-pink-300 dark:ring-pink-700"
+                          width={32}
+                          height={32}
+                          className="rounded-full ring-2 ring-pink-300 dark:ring-pink-700"
                         />
                       ) : (
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-400 flex items-center justify-center text-white text-sm font-bold">

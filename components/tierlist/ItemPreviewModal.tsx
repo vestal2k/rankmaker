@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { X, ImageIcon, Youtube } from "lucide-react";
 import type { TierItem } from "./types";
 
@@ -51,11 +52,15 @@ export function ItemPreviewModal({ item, onClose, onCoverUpload }: ItemPreviewMo
         ) : item.mediaType === "AUDIO" ? (
           <AudioPreview item={item} onCoverUpload={onCoverUpload} />
         ) : (
-          <img
-            src={item.mediaUrl}
-            alt={item.label || ""}
-            className="max-w-full max-h-[85vh] object-contain"
-          />
+          <div className="relative w-[560px] max-w-full aspect-video">
+            <Image
+              src={item.mediaUrl}
+              alt={item.label || ""}
+              fill
+              sizes="(max-width: 560px) 100vw, 560px"
+              className="object-contain"
+            />
+          </div>
         )}
       </div>
     </div>
@@ -119,11 +124,13 @@ function AudioPreview({ item, onCoverUpload }: AudioPreviewProps) {
   return (
     <div className="p-8 flex flex-col items-center gap-4 min-w-[300px]">
       {item.coverImageUrl ? (
-        <div className="relative group">
-          <img
+        <div className="relative group w-48 h-48">
+          <Image
             src={item.coverImageUrl}
             alt="Audio cover"
-            className="w-48 h-48 object-cover rounded-lg"
+            fill
+            sizes="192px"
+            className="object-cover rounded-lg"
           />
           {onCoverUpload && (
             <label

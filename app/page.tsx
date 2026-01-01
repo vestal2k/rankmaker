@@ -205,11 +205,13 @@ export default function Home() {
                 <Link key={tierlist.id} href={`/tierlist/${tierlist.id}`}>
                   <div className="card-cartoon card-cartoon-hover overflow-hidden cursor-pointer h-full flex flex-col">
                     {tierlist.coverImageUrl ? (
-                      <div className="w-full h-44 overflow-hidden flex-shrink-0">
-                        <img
+                      <div className="w-full h-44 overflow-hidden flex-shrink-0 relative">
+                        <Image
                           src={tierlist.coverImageUrl}
                           alt={tierlist.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover"
                         />
                       </div>
                     ) : (
@@ -232,10 +234,12 @@ export default function Home() {
                       </p>
                       <div className="flex items-center gap-3 mb-4">
                         {tierlist.user?.imageUrl ? (
-                          <img
+                          <Image
                             src={tierlist.user.imageUrl}
                             alt={tierlist.user?.username || "User"}
-                            className="w-8 h-8 rounded-full border-2 border-zinc-900"
+                            width={32}
+                            height={32}
+                            className="rounded-full border-2 border-zinc-900"
                           />
                         ) : (
                           <div className="w-8 h-8 rounded-full bg-[#4DABF7] flex items-center justify-center text-white text-sm font-bold border-2 border-zinc-900">

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Volume2, Film, Youtube } from "lucide-react";
 import type { TierItem } from "./types";
 
@@ -17,12 +18,14 @@ export function MediaPreview({ item, className = "" }: MediaPreviewProps) {
     case "YOUTUBE":
       return (
         <div className={`relative ${className}`}>
-          <img
+          <Image
             src={item.embedId ? getYouTubeThumbnail(item.embedId) : item.coverImageUrl || ""}
             alt={item.label || "YouTube video"}
-            className="w-full h-full object-cover rounded"
+            fill
+            sizes="64px"
+            className="object-cover rounded"
           />
-          <div className="absolute bottom-0.5 right-0.5 bg-red-600 rounded p-0.5">
+          <div className="absolute bottom-0.5 right-0.5 bg-red-600 rounded p-0.5 z-10">
             <Youtube className="w-3 h-3 text-white" />
           </div>
         </div>
@@ -32,10 +35,12 @@ export function MediaPreview({ item, className = "" }: MediaPreviewProps) {
       return (
         <div className={`relative ${className}`}>
           {item.coverImageUrl ? (
-            <img
+            <Image
               src={item.coverImageUrl}
               alt={item.label || "Tweet"}
-              className="w-full h-full object-cover rounded"
+              fill
+              sizes="64px"
+              className="object-cover rounded"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center rounded">
@@ -44,7 +49,7 @@ export function MediaPreview({ item, className = "" }: MediaPreviewProps) {
               </svg>
             </div>
           )}
-          <div className="absolute bottom-0.5 right-0.5 bg-black rounded p-0.5">
+          <div className="absolute bottom-0.5 right-0.5 bg-black rounded p-0.5 z-10">
             <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
@@ -56,17 +61,19 @@ export function MediaPreview({ item, className = "" }: MediaPreviewProps) {
       return (
         <div className={`relative ${className}`}>
           {item.coverImageUrl ? (
-            <img
+            <Image
               src={item.coverImageUrl}
               alt={item.label || "Instagram post"}
-              className="w-full h-full object-cover rounded"
+              fill
+              sizes="64px"
+              className="object-cover rounded"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center rounded">
               <InstagramIcon className="w-6 h-6 text-white" />
             </div>
           )}
-          <div className="absolute bottom-0.5 right-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded p-0.5">
+          <div className="absolute bottom-0.5 right-0.5 bg-gradient-to-r from-purple-500 to-pink-500 rounded p-0.5 z-10">
             <InstagramIcon className="w-3 h-3 text-white" />
           </div>
         </div>
@@ -94,7 +101,7 @@ export function MediaPreview({ item, className = "" }: MediaPreviewProps) {
               video.currentTime = 0;
             }}
           />
-          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
+          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5 z-10">
             <Film className="w-3 h-3 text-white" />
           </div>
         </div>
@@ -104,17 +111,19 @@ export function MediaPreview({ item, className = "" }: MediaPreviewProps) {
       return (
         <div className={`relative ${className}`}>
           {item.coverImageUrl ? (
-            <img
+            <Image
               src={item.coverImageUrl}
               alt={item.label || "Audio cover"}
-              className="w-full h-full object-cover rounded"
+              fill
+              sizes="64px"
+              className="object-cover rounded"
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center rounded">
               <Volume2 className="w-8 h-8 text-white" />
             </div>
           )}
-          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5">
+          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded p-0.5 z-10">
             <Volume2 className="w-3 h-3 text-white" />
           </div>
         </div>
@@ -123,12 +132,15 @@ export function MediaPreview({ item, className = "" }: MediaPreviewProps) {
     case "GIF":
       return (
         <div className={`relative ${className}`}>
-          <img
+          <Image
             src={item.mediaUrl}
             alt={item.label || ""}
-            className="w-full h-full object-cover rounded"
+            fill
+            sizes="64px"
+            className="object-cover rounded"
+            unoptimized
           />
-          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded px-1">
+          <div className="absolute bottom-0.5 right-0.5 bg-black/60 rounded px-1 z-10">
             <span className="text-[10px] font-bold text-white">GIF</span>
           </div>
         </div>
@@ -137,11 +149,15 @@ export function MediaPreview({ item, className = "" }: MediaPreviewProps) {
     case "IMAGE":
     default:
       return (
-        <img
-          src={item.mediaUrl}
-          alt={item.label || ""}
-          className={`w-full h-full object-cover rounded ${className}`}
-        />
+        <div className={`relative ${className}`}>
+          <Image
+            src={item.mediaUrl}
+            alt={item.label || ""}
+            fill
+            sizes="64px"
+            className="object-cover rounded"
+          />
+        </div>
       );
   }
 }
