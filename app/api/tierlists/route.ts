@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     const { user } = await validateRequest();
 
     const body = await request.json();
-    const { title, description, coverImageUrl, isPublic, tiers, anonymousId } = body;
+    const { title, description, category, coverImageUrl, isPublic, tiers, anonymousId } = body;
 
     if (!title || !tiers || !Array.isArray(tiers)) {
       return NextResponse.json(
@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
         data: {
           title,
           description: description || null,
+          category: category || null,
           coverImageUrl: coverImageUrl || null,
           isPublic: isPublic ?? true,
           userId: user.id,
@@ -128,6 +129,7 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         description: description || null,
+        category: category || null,
         coverImageUrl: coverImageUrl || null,
         isPublic: false,
         anonymousId,

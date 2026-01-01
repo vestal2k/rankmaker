@@ -88,7 +88,7 @@ export async function PUT(
     const { user } = await validateRequest();
     const { id } = await params;
     const body = await request.json();
-    const { title, description, coverImageUrl, isPublic, tiers, anonymousId } = body;
+    const { title, description, category, coverImageUrl, isPublic, tiers, anonymousId } = body;
 
     const existingTierlist = await db.tierList.findUnique({
       where: { id },
@@ -127,6 +127,7 @@ export async function PUT(
       data: {
         title: title || existingTierlist.title,
         description: description !== undefined ? description : existingTierlist.description,
+        category: category !== undefined ? category : existingTierlist.category,
         coverImageUrl: coverImageUrl !== undefined ? coverImageUrl : existingTierlist.coverImageUrl,
         isPublic: existingTierlist.anonymousId ? false : (isPublic !== undefined ? isPublic : existingTierlist.isPublic),
         tiers: tiers

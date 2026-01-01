@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Undo2, Redo2, LayoutTemplate, Link2 } from "lucide-react";
+import { Plus, Trash2, Download, Save, Settings, ChevronUp, ChevronDown, Palette, ImageIcon, X, Undo2, Redo2, LayoutTemplate, Link2, LayoutGrid } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
@@ -61,6 +61,21 @@ interface HistoryState {
   unplacedItems: TierItem[];
 }
 
+const CATEGORIES = [
+  { value: "games", label: "Games" },
+  { value: "movies", label: "Movies" },
+  { value: "tv shows", label: "TV Shows" },
+  { value: "music", label: "Music" },
+  { value: "food", label: "Food" },
+  { value: "sports", label: "Sports" },
+  { value: "anime", label: "Anime" },
+  { value: "books", label: "Books" },
+  { value: "cars", label: "Cars" },
+  { value: "travel", label: "Travel" },
+  { value: "lifestyle", label: "Lifestyle" },
+  { value: "other", label: "Other" },
+];
+
 const getAnonymousId = () => {
   if (typeof window === "undefined") return null;
   let anonymousId = localStorage.getItem("rankmaker_anonymous_id");
@@ -79,6 +94,7 @@ function CreatePageContent() {
   const [anonymousId, setAnonymousId] = useState<string | null>(null);
   const [title, setTitle] = useState("My Tier List");
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState<string | null>(null);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
@@ -213,6 +229,7 @@ function CreatePageContent() {
       setTierlistId(data.id);
       setTitle(data.title);
       setDescription(data.description || "");
+      setCategory(data.category || null);
       setCoverImageUrl(data.coverImageUrl || null);
       setIsPublic(data.isPublic);
 
@@ -612,6 +629,7 @@ function CreatePageContent() {
       const payload: Record<string, any> = {
         title,
         description: description || null,
+        category: category || null,
         coverImageUrl: coverImageUrl || null,
         isPublic: isSignedIn ? isPublic : false,
         tiers: allTiers,
@@ -731,6 +749,32 @@ function CreatePageContent() {
                       {isSignedIn ? (isPublic ? "Public" : "Private") : "Private"} tier list
                       {!isSignedIn && <span className="text-xs ml-2">(Sign in to publish publicly)</span>}
                     </Label>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-2 block">Category</Label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="btn-cartoon btn-white w-full flex items-center justify-between gap-2 !py-2">
+                          <span className="flex items-center gap-2">
+                            <LayoutGrid className="w-4 h-4" />
+                            {category ? CATEGORIES.find(c => c.value === category)?.label : "Select a category"}
+                          </span>
+                          <ChevronDown className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-56">
+                        {CATEGORIES.map((cat) => (
+                          <DropdownMenuItem
+                            key={cat.value}
+                            onClick={() => setCategory(cat.value)}
+                            className={category === cat.value ? "bg-primary/10" : ""}
+                          >
+                            {cat.label}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
 
