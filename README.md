@@ -51,7 +51,6 @@
 
 ### Experience
 
-- No login required to create
 - Public or private tier lists
 - Upvote/downvote system
 - Comments section
